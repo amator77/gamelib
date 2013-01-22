@@ -85,36 +85,13 @@ public class XMPPMD5Connection implements Connection,
 		configuration.setDebuggerEnabled(true);		
 		configuration.setRosterLoadedAtLogin(true);
 		configuration.setSendPresence(true);
+		Roster.setDefaultSubscriptionMode(SubscriptionMode.manual);
 		
 		if( Application.getContext().getPlatform() == PLATFORM.MOBILE_ANDROID ){
 			configuration.setTruststoreType("BKS");
 			configuration.setTruststorePath(getCacertsPath());
-		}
-		
-		Roster.setDefaultSubscriptionMode(SubscriptionMode.manual);
-		this.configurePM(ProviderManager.getInstance());
-	}
-	
-	private static String getCacertsPath(){								
-		try {
-			InputStream fis =  Application.getContext().getResourceAsInputStream("cacerts.bks");
-			File f = File.createTempFile("cacerts", "bks");
-			byte[] buffer = new byte[1024];
-			FileOutputStream fos = new FileOutputStream(f);
-			int read = 0;
-			
-			while( (read = fis.read(buffer)) != -1 ){
-				fos.write(buffer, 0, read);
-			}
-			
-			fis.close();
-			fos.close();
-			return f.getPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return null;		
+			this.configurePM(ProviderManager.getInstance());
+		}					
 	}
 	
 	@Override
@@ -124,7 +101,7 @@ public class XMPPMD5Connection implements Connection,
 	
 	@Override
 	public void login(String id, String credentials)
-			throws ConnectionException, LoginException {
+			throws IOException, LoginException {
 
 		if (this.xmppConnection == null) {
 			xmppConnection = new XMPPConnection(configuration);
@@ -143,9 +120,10 @@ public class XMPPMD5Connection implements Connection,
 						new PacketTypeFilter(PingExtension.class));
 				xmppConnection.addPacketListener(new PresenceListener(),
 						new PacketTypeFilter(Presence.class));
+				xmppConnection.addPacketListener(new MessageListener(), new  PacketTypeFilter(org.jivesoftware.smack.packet.Message.class));
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
-				throw new ConnectionException("Error on coonecting!", e);
+				throw new IOException("Error on coonecting!", e);
 			}
 		}
 
@@ -175,7 +153,7 @@ public class XMPPMD5Connection implements Connection,
 	}
 
 	@Override
-	public void sendMessage(Message message) throws ConnectionException {
+	public void sendMessage(Message message) throws IOException {
 		if (this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated()) {
 			org.jivesoftware.smack.packet.Message xmppMessage = new org.jivesoftware.smack.packet.Message();
@@ -191,7 +169,7 @@ public class XMPPMD5Connection implements Connection,
 	}
 
 	@Override
-	public void sendPresence(MODE status) throws ConnectionException {
+	public void sendPresence(MODE status) throws IOException {
 		if (this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated()) {
 			this.xmppConnection.sendPacket(getPresence(status));
@@ -239,10 +217,12 @@ public class XMPPMD5Connection implements Connection,
 		return xmppConnection;
 	}
 
-	public class MessageListener implements PacketListener {
+	private class MessageListener implements PacketListener {
 		@Override
 		public void processPacket(Packet packet) {
 			if (packet instanceof org.jivesoftware.smack.packet.Message) {
+				Log.debug(TAG, "Message received :"+packet.toXML());
+				
 				for (ConnectionListener listener : listeners) {
 					listener.messageReceived(
 							XMPPMD5Connection.this,
@@ -257,6 +237,7 @@ public class XMPPMD5Connection implements Connection,
 		public void processPacket(Packet packet) {
 			if (!(packet instanceof Presence))
 				return;
+			Log.debug(TAG, "Presence received :"+packet.toXML());
 			Presence presence = (Presence) packet;
 			String resource = Util.getResourceFromId(presence.getFrom());
 			
@@ -290,7 +271,8 @@ public class XMPPMD5Connection implements Connection,
 				pong.setType(IQ.Type.RESULT);
 				pong.setTo(p.getFrom());
 				pong.setPacketID(p.getPacketID());
-				xmppConnection.sendPacket(pong);
+				Log.debug(TAG, "Send pong response");
+				xmppConnection.sendPacket(pong);				
 			}
 		}
 	}
@@ -362,5 +344,27 @@ public class XMPPMD5Connection implements Connection,
 		}
 
 		return p;
+	}
+	
+	private static String getCacertsPath(){								
+		try {
+			InputStream fis =  Application.getContext().getResourceAsInputStream("cacerts.bks");
+			File f = File.createTempFile("cacerts", "bks");
+			byte[] buffer = new byte[1024];
+			FileOutputStream fos = new FileOutputStream(f);
+			int read = 0;
+			
+			while( (read = fis.read(buffer)) != -1 ){
+				fos.write(buffer, 0, read);
+			}
+			
+			fis.close();
+			fos.close();
+			return f.getPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;		
 	}
 }

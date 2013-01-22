@@ -1,17 +1,14 @@
 package com.gamelib.game;
 
-import java.util.Date;
 import java.util.Map;
-
-import com.gamelib.transport.Contact;
 
 public interface IChallenge {
 	
-	public Contact getRemoteContact();
+	public String getRemoteId();
 	
-	public Contact getLocalContact();
+	public String getLocalId();
 	
-	public Date getSendTime();
+	public long getTime();
 	
 	public Map<String, String> getDetails();
 }

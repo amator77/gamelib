@@ -1,5 +1,6 @@
 package com.gamelib.application;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public interface Context {
 	
 	public void initialize(Object contextData);
 	
-	public InputStream getResourceAsInputStream(String resource);
+	public InputStream getResourceAsInputStream(String resource) throws IOException;
 	
 	public Logger getLogger();
 	

@@ -1,5 +1,7 @@
 package com.gamelib.game;
 
+import java.io.IOException;
+
 import com.gamelib.transport.Contact;
 
 public interface IGame {
@@ -14,5 +16,5 @@ public interface IGame {
 	
 	public void setGameListener(IGameListener listener);
 	
-	public void sendCommand(IGameCommand command);
+	public void sendCommand(IGameCommand command) throws IOException;
 }

@@ -18,7 +18,7 @@ public interface Account {
 	
 	public STATUS getStatus();
 	
-	public void login(LoginCallback callback);
+	public void login(LoginCallback callback) ;
 	
 	public void logout();
 	
