@@ -1,6 +1,7 @@
 package com.gamelib.game;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public interface IGameController {
@@ -28,9 +29,24 @@ public interface IGameController {
 
 	/**
 	 * 
-	 * @param remoteContact
+	 * @param remoteId
 	 * @param details
+	 * @return
+	 * @throws IOException
 	 */
-	public void sendChallenge(String remoteId, Map<String, String> details)
+	public IChallenge sendChallenge(String remoteId, Map<String, String> details)
 			throws IOException;
+	
+	/**
+	 * 
+	 * @param challenge
+	 * @throws IOException
+	 */
+	public void abortChallenge(IChallenge challenge) throws IOException;
+	
+	/**
+	 * Return the current list of challenges( send or received )
+	 * @return
+	 */
+	public List<IChallenge> listChallanges();
 }

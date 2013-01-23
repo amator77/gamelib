@@ -2,19 +2,15 @@ package com.gamelib.game;
 
 import java.io.IOException;
 
-import com.gamelib.transport.Contact;
-
 public interface IGame {
 	
-	public enum STATE { NOT_STARTED , STARTED , FINISHED }
+	public enum STATE { NOT_READY , READY , IN_PROGRESS }
+		
+	public IChallenge getChallenge();
 	
-	public String getId();
+	public void addGameListener(IGameListener listener);
 	
-	public Contact getLocalContact();
-	
-	public Contact getRemoteContact();
-	
-	public void setGameListener(IGameListener listener);
+	public void removeGameListener(IGameListener listener);
 	
 	public void sendCommand(IGameCommand command) throws IOException;
 }

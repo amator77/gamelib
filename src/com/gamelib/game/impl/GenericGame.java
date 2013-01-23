@@ -1,4 +1,4 @@
-package com.gamelib.game.chess;
+package com.gamelib.game.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,16 +9,18 @@ import com.gamelib.game.IGame;
 import com.gamelib.game.IGameCommand;
 import com.gamelib.game.IGameListener;
 
-public class ChessGame implements IGame {
+public class GenericGame implements IGame {
+	
+	private GameController ctrl;
 	
 	private IChallenge challenge;
 	
 	private List<IGameListener> listeners;
 	
-	public ChessGame(IChallenge challenge){
+	private GenericGame(GameController ctrl,IChallenge challenge){
+		this.ctrl = ctrl;
 		this.challenge = challenge;
 		this.listeners = new ArrayList<IGameListener>();
-		
 	}
 	
 	@Override
@@ -27,22 +29,23 @@ public class ChessGame implements IGame {
 	}
 
 	@Override
-	public void addGameListener(IGameListener listener) {
-		// TODO Auto-generated method stub
-		
+	public void addGameListener(IGameListener listener) {	
+		if( !this.listeners.contains(listener)){
+			this.listeners.add(listener);
+		}		
 	}
 
 	@Override
 	public void removeGameListener(IGameListener listener) {
-		// TODO Auto-generated method stub
-		
+		if( this.listeners.contains(listener)){
+			this.listeners.add(listener);
+		}		
 	}
 
 	@Override
 	public void sendCommand(IGameCommand command) throws IOException {
-		// TODO Auto-generated method stub
+//		this.ctrl.
 		
 	}
-	
-	
+
 }

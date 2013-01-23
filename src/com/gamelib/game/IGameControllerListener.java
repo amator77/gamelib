@@ -14,7 +14,7 @@ public interface IGameControllerListener {
 	 * 
 	 * @param challenge
 	 */
-	public void challengeAborted(IChallenge challenge);
+	public void challengeCanceled(IChallenge challenge);
 	
 	/**
 	 * Event for challenge accepted.In this moment is safe to start the game
@@ -22,5 +22,11 @@ public interface IGameControllerListener {
 	 * 
 	 * @param gameStarted
 	 */
-	public void challengeAccepted(IGame gameStarted);
+	public void challengeAccepted(IChallenge challenge);
+	
+	/**
+	 * 
+	 * @param challeng
+	 */
+	public void challengeRejected(IChallenge challeng);
 }

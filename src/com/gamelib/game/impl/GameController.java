@@ -12,22 +12,24 @@ import com.gamelib.game.IChallenge;
 import com.gamelib.game.IGameCommand;
 import com.gamelib.game.IGameController;
 import com.gamelib.game.IGameControllerListener;
-import com.gamelib.game.commands.GenericSendGameCommand;
 import com.gamelib.transport.Connection;
 import com.gamelib.transport.ConnectionListener;
 import com.gamelib.transport.Message;
 
 public class GameController implements IGameController, ConnectionListener {
-	
+
 	private Account account;
 
 	private List<IGameControllerListener> listeners;
+
+	private List<IChallenge> challenges;
 
 	private static final Logger log = Application.getContext().getLogger();
 
 	public GameController(Account account) {
 		this.account = account;
 		this.listeners = new ArrayList<IGameControllerListener>();
+		this.challenges = new ArrayList<IChallenge>();
 		this.account.getConnection().addConnectionListener(this);
 	}
 
@@ -37,32 +39,47 @@ public class GameController implements IGameController, ConnectionListener {
 			this.listeners.add(listener);
 		}
 	}
-
+	
 	@Override
-	public void acceptChallenge(IChallenge challenge) {
-
+	public List<IChallenge> listChallanges() {
+		return this.challenges;
 	}
 
 	@Override
-	public void rejectChallenge(IChallenge challenge) {
-		
-		
-//		this.account.getConnection().sendMessage(new GenericSendGameCommand(IGameCommand.CHALLENGE_COMMAND_ID));
+	public void acceptChallenge(IChallenge challenge) throws IOException {
+		this.sendChallengeCommand(IGameCommand.CHALLENGE_ACCEPTED_COMMAND_ID,
+				challenge);
+		this.challenges.remove(challenge);
 	}
 
 	@Override
-	public void sendChallenge(String remoteId, Map<String, String> details)
+	public void rejectChallenge(IChallenge challenge) throws IOException {
+		this.sendChallengeCommand(IGameCommand.CHALLENGE_REJECTED_COMMAND_ID,
+				challenge);
+		this.challenges.remove(challenge);
+	}
+
+	@Override
+	public void abortChallenge(IChallenge challenge) throws IOException {
+		this.sendChallengeCommand(IGameCommand.CHALLENGE_CANCELED_COMMAND_ID,
+				challenge);
+		this.challenges.remove(challenge);
+	}
+
+	@Override
+	public IChallenge sendChallenge(String remoteId, Map<String, String> details)
 			throws IOException {
-		log.debug(this.getClass().getName(), "Send challenge command to :"
-				+ remoteId);
-		GenericSendGameCommand cmd = new GenericSendGameCommand(IGameCommand.CHALLENGE_COMMAND_ID);
-		cmd.setHeaderProperty("time",String.valueOf(System.currentTimeMillis()));
-		this.account.getConnection().sendMessage(cmd);
+		GameChallenge gchallenge = new GameChallenge(this.account.getId(),
+				remoteId);
+		this.sendChallengeCommand(IGameCommand.CHALLENGE_COMMAND_ID, gchallenge);
+		this.challenges.add(gchallenge);
+		return gchallenge;
 	}
 
 	@Override
 	public void messageReceived(Connection source, Message message) {
-		String commandId = message.getHeader(IGameCommand.GAME_COMMAND_HEADER_KEY);
+		String commandId = message
+				.getHeader(IGameCommand.GAME_COMMAND_HEADER_KEY);
 
 		if (commandId != null) {
 
@@ -71,8 +88,12 @@ public class GameController implements IGameController, ConnectionListener {
 
 			switch (Integer.parseInt(commandId)) {
 			case IGameCommand.CHALLENGE_COMMAND_ID:
-				this.fireChallengeReceivedEvent(new GameChallenge(message
-						.getTo(), message.getFrom()));
+			case IGameCommand.CHALLENGE_REJECTED_COMMAND_ID:
+			case IGameCommand.CHALLENGE_CANCELED_COMMAND_ID:
+			case IGameCommand.CHALLENGE_ACCEPTED_COMMAND_ID:
+				this.handleChallengeCommand(Integer.parseInt(commandId),
+						message.getFrom(),
+						message.getHeader(IChallenge.HEADER_TIME_KEY));
 				break;
 			default:
 				break;
@@ -83,14 +104,105 @@ public class GameController implements IGameController, ConnectionListener {
 		}
 	}
 
+	private void handleChallengeCommand(int commandId, String accountId,
+			String utcTime) {
+		if (accountId != null && utcTime != null) {
+			log.debug(this.getClass().getName(), "New challange from :"
+					+ accountId + " , cmd :" + commandId);
+
+			try {
+				long time = Long.parseLong(utcTime);
+				IChallenge challenge = findChallenge(accountId, time);
+
+				switch (commandId) {
+				case IGameCommand.CHALLENGE_COMMAND_ID:
+					GameChallenge gc = new GameChallenge(this.account.getId(),
+							accountId, time);
+					this.challenges.add(gc);
+
+					for (IGameControllerListener listener : this.listeners) {
+						listener.challengeReceived(gc);
+					}
+
+					break;
+				case IGameCommand.CHALLENGE_REJECTED_COMMAND_ID:
+
+					if (challenge != null) {
+						this.challenges.remove(challenge);
+
+						for (IGameControllerListener listener : this.listeners) {
+							listener.challengeRejected(challenge);
+						}
+					}
+
+					break;
+				case IGameCommand.CHALLENGE_CANCELED_COMMAND_ID:
+					if (challenge != null) {
+						this.challenges.remove(challenge);
+						
+						for (IGameControllerListener listener : this.listeners) {
+							listener.challengeCanceled(challenge);
+						}
+					}
+
+					break;
+				case IGameCommand.CHALLENGE_ACCEPTED_COMMAND_ID:
+					if (challenge != null) {
+						this.challenges.remove(challenge);
+
+						for (IGameControllerListener listener : this.listeners) {
+							listener.challengeAccepted(challenge);
+						}
+					}
+					break;
+				default:
+					break;
+				}
+
+			} catch (Exception e) {
+				log.error(getClass().toString(),
+						"Exception on processing challenge command!", e);
+			}
+		} else {
+			log.debug(getClass().toString(), "Invalid challenge command");
+		}
+	}
+
 	@Override
 	public void onDisconect(Connection source) {
 
 	}
 
-	protected void fireChallengeReceivedEvent(GameChallenge challenge) {
-		for (IGameControllerListener listener : this.listeners) {
-			listener.challengeReceived(challenge);
+	private IChallenge findChallenge(String accountId, long time) {
+		for (IChallenge challenge : this.challenges) {
+
+			if (challenge.getRemoteId().equals(accountId)
+					&& challenge.getTime() == time) {
+
+				return challenge;
+			}
 		}
+
+		return null;
+	}
+
+	private void sendCommand(GenericSendGameCommand cmd) throws IOException {
+		log.debug(this.getClass().getName(),
+				"Send command :" + cmd.toString());
+
+		if (this.account.getConnection().isConnected()) {
+			this.account.getConnection().sendMessage(cmd);
+		}
+	}
+
+	private void sendChallengeCommand(int commandId, IChallenge challenge)
+			throws IOException {
+		GenericSendGameCommand cmd = new GenericSendGameCommand(commandId);
+		cmd.setTo(challenge.getRemoteId());
+		cmd.setHeaderProperty(IGameCommand.GAME_COMMAND_HEADER_KEY,
+				String.valueOf(commandId));
+		cmd.setHeaderProperty(IChallenge.HEADER_TIME_KEY,
+				String.valueOf(challenge.getTime()));
+		this.sendCommand(cmd);
 	}
 }

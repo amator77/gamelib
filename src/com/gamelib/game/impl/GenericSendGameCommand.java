@@ -1,4 +1,4 @@
-package com.gamelib.game.commands;
+package com.gamelib.game.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,9 +16,12 @@ public class GenericSendGameCommand implements IGameCommand {
 	
 	private Map<String, String> header;
 	
+	private String body;
+	
 	public GenericSendGameCommand(int commandId){
 		this.commandId = commandId;
 		this.header = new HashMap<String, String>();
+		this.body = "";
 	}
 	
 	@Override
@@ -56,7 +59,15 @@ public class GenericSendGameCommand implements IGameCommand {
 
 	@Override
 	public String getBody() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.body;
+	}
+
+	@Override
+	public String toString() {
+		return "GenericSendGameCommand [commandId=" + commandId + ", from="
+				+ from + ", to=" + to + ", header=" + header + ", body=" + body
+				+ "]";
 	}	
+	
+	
 }

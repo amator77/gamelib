@@ -37,10 +37,9 @@ import com.gamelib.application.Logger;
 import com.gamelib.transport.Connection;
 import com.gamelib.transport.ConnectionListener;
 import com.gamelib.transport.Message;
+import com.gamelib.transport.Presence.MODE;
 import com.gamelib.transport.RosterListener;
 import com.gamelib.transport.Util;
-import com.gamelib.transport.Presence.MODE;
-import com.gamelib.transport.exceptions.ConnectionException;
 import com.gamelib.transport.exceptions.LoginException;
 import com.gamelib.transport.xmpp.PingExtension;
 import com.gamelib.transport.xmpp.XMPPContact;
@@ -64,7 +63,7 @@ public class XMPPMD5Connection implements Connection,
 	private static final int GTALK_PORT = 5222;
 
 	private static final String GTALK_SERVICE = "gtalk";
-	
+
 	private XMPPConnection xmppConnection;
 
 	private List<ConnectionListener> listeners;
@@ -74,34 +73,35 @@ public class XMPPMD5Connection implements Connection,
 	private XMPPRoster roster;
 
 	private ConnectionConfiguration configuration;
-	
+
 	private static final Logger Log = Application.getContext().getLogger();
-	
+
 	public XMPPMD5Connection() {
 		this.listeners = new ArrayList<ConnectionListener>();
 		configuration = new ConnectionConfiguration(GTALK_HOST, GTALK_PORT,
 				GTALK_SERVICE, ProxyInfo.forNoProxy());
-		configuration.setSecurityMode(SecurityMode.enabled);				
-		configuration.setDebuggerEnabled(true);		
+		configuration.setSecurityMode(SecurityMode.enabled);
+		configuration.setDebuggerEnabled(true);
 		configuration.setRosterLoadedAtLogin(true);
 		configuration.setSendPresence(true);
 		Roster.setDefaultSubscriptionMode(SubscriptionMode.manual);
-		
-		if( Application.getContext().getPlatform() == PLATFORM.MOBILE_ANDROID ){
+
+		if (Application.getContext().getPlatform() == PLATFORM.MOBILE_ANDROID) {
 			configuration.setTruststoreType("BKS");
 			configuration.setTruststorePath(getCacertsPath());
 			this.configurePM(ProviderManager.getInstance());
-		}					
+		}
 	}
-	
+
 	@Override
 	public boolean isConnected() {
-		return this.xmppConnection != null && this.xmppConnection.isConnected() && this.xmppConnection.isAuthenticated();
+		return this.xmppConnection != null && this.xmppConnection.isConnected()
+				&& this.xmppConnection.isAuthenticated();
 	}
-	
+
 	@Override
-	public void login(String id, String credentials)
-			throws IOException, LoginException {
+	public void login(String id, String credentials) throws IOException,
+			LoginException {
 
 		if (this.xmppConnection == null) {
 			xmppConnection = new XMPPConnection(configuration);
@@ -120,7 +120,9 @@ public class XMPPMD5Connection implements Connection,
 						new PacketTypeFilter(PingExtension.class));
 				xmppConnection.addPacketListener(new PresenceListener(),
 						new PacketTypeFilter(Presence.class));
-				xmppConnection.addPacketListener(new MessageListener(), new  PacketTypeFilter(org.jivesoftware.smack.packet.Message.class));
+				xmppConnection.addPacketListener(new MessageListener(),
+						new PacketTypeFilter(
+								org.jivesoftware.smack.packet.Message.class));
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
 				throw new IOException("Error on coonecting!", e);
@@ -128,7 +130,8 @@ public class XMPPMD5Connection implements Connection,
 		}
 
 		try {
-			xmppConnection.login(id, credentials, Util.getApplicationResource());
+			xmppConnection
+					.login(id, credentials, Util.getApplicationResource());
 			this.user = xmppConnection.getUser();
 			this.roster = new XMPPRoster(xmppConnection.getRoster());
 			Log.debug(TAG, "Success on login as :" + this.user);
@@ -149,6 +152,11 @@ public class XMPPMD5Connection implements Connection,
 
 	@Override
 	public com.gamelib.transport.Roster getRoster() {
+
+		if (this.roster == null || this.roster.getContacts().size() == 0) {
+			this.roster = new XMPPRoster(xmppConnection.getRoster());
+		}
+
 		return this.roster;
 	}
 
@@ -221,8 +229,8 @@ public class XMPPMD5Connection implements Connection,
 		@Override
 		public void processPacket(Packet packet) {
 			if (packet instanceof org.jivesoftware.smack.packet.Message) {
-				Log.debug(TAG, "Message received :"+packet.toXML());
-				
+				Log.debug(TAG, "Message received :" + packet.toXML());
+
 				for (ConnectionListener listener : listeners) {
 					listener.messageReceived(
 							XMPPMD5Connection.this,
@@ -237,22 +245,22 @@ public class XMPPMD5Connection implements Connection,
 		public void processPacket(Packet packet) {
 			if (!(packet instanceof Presence))
 				return;
-			Log.debug(TAG, "Presence received :"+packet.toXML());
+			Log.debug(TAG, "Presence received :" + packet.toXML());
 			Presence presence = (Presence) packet;
 			String resource = Util.getResourceFromId(presence.getFrom());
-			
-			XMPPPresence xmppPresence =  new XMPPPresence(presence);
-			
-			if( resource != null ){
-				
-				for(XMPPContact contact : roster.getContacts()){
-					if( presence.getFrom().startsWith(contact.getId()) ){
+
+			XMPPPresence xmppPresence = new XMPPPresence(presence);
+
+			if (resource != null) {
+
+				for (XMPPContact contact : roster.getContacts()) {
+					if (presence.getFrom().startsWith(contact.getId())) {
 						contact.setPresense(xmppPresence);
 						contact.updateResource(resource);
 					}
 				}
 			}
-			
+
 			for (RosterListener listener : roster.getListeners()) {
 				listener.presenceChanged(xmppPresence);
 			}
@@ -272,7 +280,7 @@ public class XMPPMD5Connection implements Connection,
 				pong.setTo(p.getFrom());
 				pong.setPacketID(p.getPacketID());
 				Log.debug(TAG, "Send pong response");
-				xmppConnection.sendPacket(pong);				
+				xmppConnection.sendPacket(pong);
 			}
 		}
 	}
@@ -345,26 +353,27 @@ public class XMPPMD5Connection implements Connection,
 
 		return p;
 	}
-	
-	private static String getCacertsPath(){								
+
+	private static String getCacertsPath() {
 		try {
-			InputStream fis =  Application.getContext().getResourceAsInputStream("cacerts.bks");
+			InputStream fis = Application.getContext()
+					.getResourceAsInputStream("cacerts.bks");
 			File f = File.createTempFile("cacerts", "bks");
 			byte[] buffer = new byte[1024];
 			FileOutputStream fos = new FileOutputStream(f);
 			int read = 0;
-			
-			while( (read = fis.read(buffer)) != -1 ){
+
+			while ((read = fis.read(buffer)) != -1) {
 				fos.write(buffer, 0, read);
 			}
-			
+
 			fis.close();
 			fos.close();
 			return f.getPath();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return null;		
+
+		return null;
 	}
 }

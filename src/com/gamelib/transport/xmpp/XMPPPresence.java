@@ -61,4 +61,8 @@ public class XMPPPresence implements Presence {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return xmppPresence != null ? xmppPresence.toString() : Type.unavailable.toString();
+	}
 }

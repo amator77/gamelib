@@ -44,6 +44,10 @@ public class XMPPContact implements Contact {
 
 	public void updateResource(String resource) {
 		this.resource = resource;
+		
+		if( this.resource != null){
+			this.id = this.id+"/"+this.resource;
+		}
 	}
 
 	@Override
