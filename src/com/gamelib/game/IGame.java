@@ -3,7 +3,7 @@ package com.gamelib.game;
 import java.io.IOException;
 
 public interface IGame {
-	
+		
 	public enum STATE { NOT_READY , READY , IN_PROGRESS }
 		
 	public IChallenge getChallenge();

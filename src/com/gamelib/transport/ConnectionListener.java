@@ -2,7 +2,10 @@ package com.gamelib.transport;
 
 public interface ConnectionListener {
 	
-	public void messageReceived( Connection source, Message message);
+	/*
+	 * The implementation need to return true only if this message is consumed 
+	 */
+	public boolean messageReceived( Connection source, Message message);
 		
 	public void onDisconect(Connection source);		
 }

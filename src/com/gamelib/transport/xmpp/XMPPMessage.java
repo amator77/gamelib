@@ -36,4 +36,9 @@ public class XMPPMessage implements Message {
 	public Collection<String> getHeadersKeys() {
 		return this.xmppPachet.getPropertyNames();
 	}
+
+	@Override
+	public void setHeader(String key, String value) {
+		xmppPachet.setProperty(key, value);		
+	}
 }

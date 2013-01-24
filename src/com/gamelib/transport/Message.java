@@ -13,5 +13,7 @@ public interface Message {
 	
 	public String getHeader(String key);
 	
+	public void setHeader(String key,String value);
+	
 	public Collection<String> getHeadersKeys();
 }

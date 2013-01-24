@@ -40,6 +40,15 @@ public class GameController implements IGameController, ConnectionListener {
 		}
 	}
 	
+	public void sendGameCommand(IGameCommand cmd) throws IOException {
+		log.debug(this.getClass().getName(),
+				"Send command :" + cmd.toString());
+
+		if (this.account.getConnection().isConnected()) {
+			this.account.getConnection().sendMessage(cmd);
+		}
+	}
+	
 	@Override
 	public List<IChallenge> listChallanges() {
 		return this.challenges;
@@ -77,7 +86,7 @@ public class GameController implements IGameController, ConnectionListener {
 	}
 
 	@Override
-	public void messageReceived(Connection source, Message message) {
+	public boolean messageReceived(Connection source, Message message) {
 		String commandId = message
 				.getHeader(IGameCommand.GAME_COMMAND_HEADER_KEY);
 
@@ -94,7 +103,7 @@ public class GameController implements IGameController, ConnectionListener {
 				this.handleChallengeCommand(Integer.parseInt(commandId),
 						message.getFrom(),
 						message.getHeader(IChallenge.HEADER_TIME_KEY));
-				break;
+				return true;				
 			default:
 				break;
 			}
@@ -102,6 +111,8 @@ public class GameController implements IGameController, ConnectionListener {
 			log.debug(this.getClass().getName(), "Message discarded :"
 					+ message.toString());
 		}
+		
+		return false;
 	}
 
 	private void handleChallengeCommand(int commandId, String accountId,
@@ -199,9 +210,9 @@ public class GameController implements IGameController, ConnectionListener {
 			throws IOException {
 		GenericSendGameCommand cmd = new GenericSendGameCommand(commandId);
 		cmd.setTo(challenge.getRemoteId());
-		cmd.setHeaderProperty(IGameCommand.GAME_COMMAND_HEADER_KEY,
+		cmd.setHeader(IGameCommand.GAME_COMMAND_HEADER_KEY,
 				String.valueOf(commandId));
-		cmd.setHeaderProperty(IChallenge.HEADER_TIME_KEY,
+		cmd.setHeader(IChallenge.HEADER_TIME_KEY,
 				String.valueOf(challenge.getTime()));
 		this.sendCommand(cmd);
 	}

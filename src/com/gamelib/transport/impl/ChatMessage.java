@@ -55,4 +55,9 @@ public class ChatMessage implements Message {
 	public Collection<String> getHeadersKeys() {
 		return this.header.keySet();
 	}
+
+	@Override
+	public void setHeader(String key, String value) {
+		this.header.put(key, value);		
+	}
 }

@@ -17,7 +17,7 @@ public class GenericGame implements IGame {
 	
 	private List<IGameListener> listeners;
 	
-	private GenericGame(GameController ctrl,IChallenge challenge){
+	public GenericGame(GameController ctrl,IChallenge challenge){
 		this.ctrl = ctrl;
 		this.challenge = challenge;
 		this.listeners = new ArrayList<IGameListener>();
@@ -43,9 +43,11 @@ public class GenericGame implements IGame {
 	}
 
 	@Override
-	public void sendCommand(IGameCommand command) throws IOException {
-//		this.ctrl.
-		
+	public void sendCommand(IGameCommand cmd) throws IOException {		
+		this.ctrl.sendGameCommand(cmd);		
 	}
-
+	
+	public List<IGameListener> getGameListeners(){
+		return this.listeners;
+	}
 }

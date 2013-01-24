@@ -5,6 +5,8 @@ import com.gamelib.transport.Message;
 
 public interface IGameCommand extends Message {
 	
+	public static final String GAME_ID_HEADER_KEY = "gid";
+	
 	public static final String GAME_COMMAND_HEADER_KEY = "cmd";
 	
 	public static final int UNKNOWN_COMMAND_ID = -1;
@@ -21,7 +23,9 @@ public interface IGameCommand extends Message {
 	
 	public static final int ABORT_ACCEPTED_COMMAND_ID = 5;
 	
-	public static final int CHAT_COMMAND_ID = 6;
+	public static final int READY_COMMAND_ID = 6;
+	
+	public static final int CHAT_COMMAND_ID = 7;
 	
 	public int getId();	
 }
