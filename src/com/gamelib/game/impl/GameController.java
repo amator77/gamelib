@@ -32,7 +32,13 @@ public class GameController implements IGameController, ConnectionListener {
 		this.challenges = new ArrayList<IChallenge>();
 		this.account.getConnection().addConnectionListener(this);
 	}
+	
 
+	@Override
+	public Account getAccount() {		
+		return this.account;
+	}
+	
 	@Override
 	public void addGameControllerListener(IGameControllerListener listener) {
 		if (!this.listeners.contains(listener)) {

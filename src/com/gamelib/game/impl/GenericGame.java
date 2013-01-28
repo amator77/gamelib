@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gamelib.accounts.Account;
 import com.gamelib.game.IChallenge;
 import com.gamelib.game.IGame;
 import com.gamelib.game.IGameCommand;
@@ -11,14 +12,14 @@ import com.gamelib.game.IGameListener;
 
 public class GenericGame implements IGame {
 	
-	private GameController ctrl;
-	
+	private Account account;
+			
 	private IChallenge challenge;
 	
 	private List<IGameListener> listeners;
 	
-	public GenericGame(GameController ctrl,IChallenge challenge){
-		this.ctrl = ctrl;
+	public GenericGame(Account account,IChallenge challenge){
+		this.account = account;				
 		this.challenge = challenge;
 		this.listeners = new ArrayList<IGameListener>();
 	}
@@ -43,8 +44,11 @@ public class GenericGame implements IGame {
 	}
 
 	@Override
-	public void sendCommand(IGameCommand cmd) throws IOException {		
-		this.ctrl.sendGameCommand(cmd);		
+	public void sendCommand(IGameCommand cmd) throws IOException {
+		
+		if (this.account.getConnection().isConnected()) {
+			this.account.getConnection().sendMessage(cmd);
+		}					
 	}
 	
 	public List<IGameListener> getGameListeners(){

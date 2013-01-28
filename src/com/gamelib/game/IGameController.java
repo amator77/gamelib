@@ -4,8 +4,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public interface IGameController {
+import com.gamelib.accounts.Account;
 
+public interface IGameController {
+	
+	/**
+	 * Get the account of this controller
+	 * @return
+	 */
+	public Account getAccount();
+	
 	/**
 	 * 
 	 * @param listener
