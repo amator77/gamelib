@@ -193,55 +193,46 @@ public class XMPPConnectionManager implements ConnectionListener,
 		return this.user;
 	}
 
-	@Override
 	public void entriesAdded(Collection<String> arg0) {		
 		for (XMPPListener listener : this.listeners) {
 			listener.newEntriesAdded(arg0);
 		}
 	}
 
-	@Override
 	public void entriesDeleted(Collection<String> arg0) {		
 		for (XMPPListener listener : this.listeners) {
 			listener.entriesDeleted(arg0);
 		}
 	}
 
-	@Override
 	public void entriesUpdated(Collection<String> arg0) {		
 		for (XMPPListener listener : this.listeners) {
 			listener.entriesUpdated(arg0);
 		}
 	}
 
-	@Override
 	public void presenceChanged(Presence arg0) {
 		
 	}
 
-	@Override
 	public void connectionClosed() {
 		
 
 	}
 
-	@Override
 	public void connectionClosedOnError(Exception arg0) {
 	
 
 	}
 
-	@Override
 	public void reconnectingIn(int arg0) {
 	
 	}
 
-	@Override
 	public void reconnectionFailed(Exception arg0) {
 	
 	}
 
-	@Override
 	public void reconnectionSuccessful() {
 	
 	}
@@ -318,7 +309,6 @@ public class XMPPConnectionManager implements ConnectionListener,
 
 	private class PingListener implements PacketListener {
 
-		@Override
 		public void processPacket(Packet packet) {
 			if (!(packet instanceof PingExtension))
 				return;

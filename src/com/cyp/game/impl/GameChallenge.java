@@ -33,27 +33,22 @@ public class GameChallenge implements IChallenge {
 		this.received = received;
 	}
 
-	@Override
 	public String getRemoteId() {
 		return this.remoteId;
 	}
 
-	@Override
 	public String getLocalId() {
 		return this.localId;
 	}
 
-	@Override
 	public long getTime() {
 		return this.time;
 	}
 
-	@Override
 	public Map<String, String> getDetails() {
 		return null;
 	}
 
-	@Override
 	public boolean isReceived() {
 		return this.received;
 	}

@@ -17,27 +17,22 @@ public class XMPPMessage implements Message {
 				.getProperty(key).toString() : null;
 	}
 
-	@Override
 	public String getBody() {
 		return this.xmppPachet.getBody();
 	}
 
-	@Override
 	public String getFrom() {
 		return this.xmppPachet.getFrom();
 	}
 
-	@Override
 	public String getTo() {
 		return this.xmppPachet.getTo();
 	}
 
-	@Override
 	public Collection<String> getHeadersKeys() {
 		return this.xmppPachet.getPropertyNames();
 	}
 
-	@Override
 	public void setHeader(String key, String value) {
 		xmppPachet.setProperty(key, value);		
 	}

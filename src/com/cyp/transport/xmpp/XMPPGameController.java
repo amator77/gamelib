@@ -59,7 +59,6 @@ public class XMPPGameController implements PacketListener {
 		}
 	}
 
-	@Override
 	public void processPacket(Packet arg0) {
 		if (arg0 instanceof Message) {
 			Message message = (Message) arg0;

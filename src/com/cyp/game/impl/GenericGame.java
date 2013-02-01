@@ -26,19 +26,16 @@ public class GenericGame implements IGame {
 		return account;
 	}
 
-	@Override
 	public IChallenge getChallenge() {
 		return this.challenge;
 	}
 
-	@Override
 	public void addGameListener(IGameListener listener) {
 		if (!this.listeners.contains(listener)) {
 			this.listeners.add(listener);
 		}
 	}
-
-	@Override
+	
 	public void removeGameListener(IGameListener listener) {
 		if (this.listeners.contains(listener)) {
 			this.listeners.add(listener);

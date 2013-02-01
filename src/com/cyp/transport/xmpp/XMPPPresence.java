@@ -14,17 +14,14 @@ public class XMPPPresence implements Presence {
 		this.xmppPresence = xmppPresence;
 	}
 
-	@Override
 	public String getContactId() {
 		return xmppPresence.getFrom();
 	}
 
-	@Override
 	public MODE getMode() {
 		return this.convertMode(xmppPresence.getType(), xmppPresence.getMode());
 	}
-
-	@Override
+	
 	public String getStatus() {
 		return this.xmppPresence.getStatus();
 	}

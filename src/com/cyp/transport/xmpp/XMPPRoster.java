@@ -24,12 +24,10 @@ public class XMPPRoster implements Roster {
 		this.listeners = new ArrayList<RosterListener>();
 	}
 
-	@Override
 	public List<XMPPContact> getContacts() {
 		return this.contacts;
 	}
-
-	@Override
+	
 	public void addListener(RosterListener listener) {
 		if (!this.listeners.contains(listener)) {
 			this.listeners.add(listener);

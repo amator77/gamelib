@@ -31,32 +31,32 @@ public class ChatMessage implements Message {
 		this(null,null,null);
 	}
 	
-	@Override
+	
 	public String getFrom() {
 		return this.from;
 	}
 
-	@Override
+	
 	public String getTo() {
 		return this.to;
 	}
 
-	@Override
+	
 	public String getBody() {
 		return this.body;
 	}
 
-	@Override
+	
 	public String getHeader(String key) {
 		return this.header.get(key);
 	}
 
-	@Override
+	
 	public Collection<String> getHeadersKeys() {
 		return this.header.keySet();
 	}
 
-	@Override
+	
 	public void setHeader(String key, String value) {
 		this.header.put(key, value);		
 	}

@@ -93,13 +93,11 @@ public class XMPPMD5Connection implements Connection,
 		}
 	}
 
-	@Override
 	public boolean isConnected() {
 		return this.xmppConnection != null && this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated();
 	}
 
-	@Override
 	public void login(String id, String credentials) throws IOException,
 			LoginException {
 
@@ -150,7 +148,6 @@ public class XMPPMD5Connection implements Connection,
 		}
 	}
 
-	@Override
 	public com.cyp.transport.Roster getRoster() {
 
 		if (this.roster == null || this.roster.getContacts().size() == 0) {
@@ -160,7 +157,6 @@ public class XMPPMD5Connection implements Connection,
 		return this.roster;
 	}
 
-	@Override
 	public void sendMessage(Message message) throws IOException {
 		if (this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated()) {
@@ -176,7 +172,6 @@ public class XMPPMD5Connection implements Connection,
 		}
 	}
 
-	@Override
 	public void sendPresence(MODE status) throws IOException {
 		if (this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated()) {
@@ -184,21 +179,18 @@ public class XMPPMD5Connection implements Connection,
 		}
 	}
 
-	@Override
 	public void addConnectionListener(ConnectionListener listener) {
 		if (!this.listeners.contains(listener)) {
 			this.listeners.add(listener);
 		}
 	}
 
-	@Override
 	public void connectionClosed() {
 		for (ConnectionListener listener : listeners) {
 			listener.onDisconect(this);
 		}
 	}
 
-	@Override
 	public void connectionClosedOnError(Exception arg0) {
 
 		for (ConnectionListener listener : listeners) {
@@ -206,17 +198,14 @@ public class XMPPMD5Connection implements Connection,
 		}
 	}
 
-	@Override
 	public void reconnectingIn(int arg0) {
 		Log.debug(TAG, "reconnectingIn :" + arg0);
 	}
 
-	@Override
 	public void reconnectionFailed(Exception arg0) {
 		Log.error(TAG, "reconnectionFailed", arg0);
 	}
 
-	@Override
 	public void reconnectionSuccessful() {
 		Log.debug(TAG, "reconnectionSuccessful");
 	}
@@ -226,7 +215,7 @@ public class XMPPMD5Connection implements Connection,
 	}
 
 	private class MessageListener implements PacketListener {
-		@Override
+
 		public void processPacket(Packet packet) {
 			if (packet instanceof org.jivesoftware.smack.packet.Message) {
 				Log.debug(TAG, "Message received :" + packet.toXML());
@@ -269,7 +258,6 @@ public class XMPPMD5Connection implements Connection,
 
 	private class PingListener implements PacketListener {
 
-		@Override
 		public void processPacket(Packet packet) {
 			if (!(packet instanceof PingExtension))
 				return;

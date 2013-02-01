@@ -24,7 +24,6 @@ public class GenericSendGameCommand implements IGameCommand {
 		this.body = "";
 	}
 
-	@Override
 	public int getId() {
 		return this.commandId;
 	}
@@ -53,7 +52,6 @@ public class GenericSendGameCommand implements IGameCommand {
 		return this.header.keySet();
 	}
 
-	@Override
 	public String getBody() {
 		return this.body;
 	}	
@@ -62,7 +60,6 @@ public class GenericSendGameCommand implements IGameCommand {
 		this.body = body;
 	}	
 	
-	@Override
 	public void setHeader(String key, String value) {
 		this.header.put(key, value);
 	}

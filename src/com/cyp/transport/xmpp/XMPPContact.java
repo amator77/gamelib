@@ -29,7 +29,6 @@ public class XMPPContact implements Contact {
 		this(id, null, new XMPPPresence(null));
 	}
 
-	@Override
 	public Presence getPresence() {
 		return this.presense;
 	}
@@ -50,22 +49,18 @@ public class XMPPContact implements Contact {
 		}
 	}
 
-	@Override
 	public String getId() {
 		return this.id;
 	}
 
-	@Override
 	public PLATFORM getClientPlatform() {
 		return Util.getPlatform(this.resource);
 	}
 
-	@Override
 	public String getClientVersion() {
 		return Util.getClientVersion(this.resource);
 	}
 
-	@Override
 	public String getClientType() {
 		return Util.getClientType(this.resource);
 	}

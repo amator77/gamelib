@@ -36,14 +36,11 @@ public abstract class GameController implements IGameController, ConnectionListe
 		this.games = new ArrayList<IGame>();
 		this.account.getConnection().addConnectionListener(this);
 	}
-	
-
-	@Override
+		
 	public Account getAccount() {		
 		return this.account;
 	}
-	
-	@Override
+		
 	public void addGameControllerListener(IGameControllerListener listener) {
 		if (!this.listeners.contains(listener)) {
 			this.listeners.add(listener);
@@ -62,34 +59,29 @@ public abstract class GameController implements IGameController, ConnectionListe
 			return false;
 		}
 	}
-	
-	@Override
+		
 	public List<IChallenge> listChallanges() {
 		return this.challenges;
 	}
 
-	@Override
 	public void acceptChallenge(IChallenge challenge) throws IOException {
 		this.sendChallengeCommand(IGameCommand.CHALLENGE_ACCEPTED_COMMAND_ID,
 				challenge);
 		this.challenges.remove(challenge);
 	}
 
-	@Override
 	public void rejectChallenge(IChallenge challenge) throws IOException {
 		this.sendChallengeCommand(IGameCommand.CHALLENGE_REJECTED_COMMAND_ID,
 				challenge);
 		this.challenges.remove(challenge);
 	}
 
-	@Override
 	public void abortChallenge(IChallenge challenge) throws IOException {
 		this.sendChallengeCommand(IGameCommand.CHALLENGE_CANCELED_COMMAND_ID,
 				challenge);
 		this.challenges.remove(challenge);
 	}
 
-	@Override
 	public IChallenge sendChallenge(String remoteId, Map<String, String> details)
 			throws IOException {
 		GameChallenge gchallenge = new GameChallenge(this.account.getId(),
@@ -99,7 +91,6 @@ public abstract class GameController implements IGameController, ConnectionListe
 		return gchallenge;
 	}
 
-	@Override
 	public boolean messageReceived(Connection source, Message message) {
 		String commandId = message
 				.getHeader(IGameCommand.GAME_COMMAND_HEADER_KEY);
@@ -193,7 +184,6 @@ public abstract class GameController implements IGameController, ConnectionListe
 		}
 	}
 
-	@Override
 	public void onDisconect(Connection source) {
 
 	}
@@ -232,13 +222,11 @@ public abstract class GameController implements IGameController, ConnectionListe
 	}
 
 
-	@Override
 	public void closeGame(IGame game) {
 		this.games.remove(game);		
 	}
 
 
-	@Override
 	public List<IGame> listGames() {		
 		return this.games;
 	}
