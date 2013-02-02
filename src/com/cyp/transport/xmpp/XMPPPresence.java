@@ -4,7 +4,6 @@ import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
 
 import com.cyp.transport.Presence;
-import com.cyp.transport.Presence.MODE;
 
 public class XMPPPresence implements Presence {
 
@@ -15,15 +14,30 @@ public class XMPPPresence implements Presence {
 	}
 
 	public String getContactId() {
-		return xmppPresence.getFrom();
+		if( xmppPresence != null ){
+			return xmppPresence.getFrom();
+		}
+		else{
+			return null;
+		}
 	}
 
 	public MODE getMode() {
-		return this.convertMode(xmppPresence.getType(), xmppPresence.getMode());
+		if( xmppPresence != null ){
+			return this.convertMode(xmppPresence.getType(), xmppPresence.getMode());
+		}
+		else{
+			return MODE.OFFLINE;
+		}
 	}
 	
 	public String getStatus() {
-		return this.xmppPresence.getStatus();
+		if( this.xmppPresence != null ){
+			return this.xmppPresence.getStatus();
+		}
+		else{
+			return "unknown";
+		}
 	}
 
 	private MODE convertMode(Type type, Mode mode) {

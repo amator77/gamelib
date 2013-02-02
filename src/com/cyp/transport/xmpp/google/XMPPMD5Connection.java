@@ -237,16 +237,14 @@ public class XMPPMD5Connection implements Connection,
 			Log.debug(TAG, "Presence received :" + packet.toXML());
 			Presence presence = (Presence) packet;
 			String resource = Util.getResourceFromId(presence.getFrom());
-
+			String contact = Util.getContactFromId(presence.getFrom());
+			Log.debug(TAG, "Resource :" +resource +" Contact :"+contact);
 			XMPPPresence xmppPresence = new XMPPPresence(presence);
-
-			if (resource != null) {
-
-				for (XMPPContact contact : roster.getContacts()) {
-					if (presence.getFrom().startsWith(contact.getId())) {
-						contact.setPresense(xmppPresence);
-						contact.updateResource(resource);
-					}
+			
+			for (XMPPContact xmppContact : roster.getContacts()) {
+				if (xmppContact.getId().startsWith(contact)) {
+					xmppContact.setPresense(xmppPresence);
+					xmppContact.updateResource(resource != null ? resource : "");
 				}
 			}
 

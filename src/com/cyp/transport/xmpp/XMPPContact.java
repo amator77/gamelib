@@ -43,10 +43,8 @@ public class XMPPContact implements Contact {
 
 	public void updateResource(String resource) {
 		this.resource = resource;
-		
-		if( this.resource != null){
-			this.id = this.id+"/"+this.resource;
-		}
+		String[] parts = this.id.split("/");
+		this.id = parts[0] + ( (resource != null && resource.trim().length() > 0 ) ? ("/"+resource) : ""  );
 	}
 
 	public String getId() {

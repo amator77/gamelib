@@ -6,8 +6,6 @@ import com.cyp.application.Context.PLATFORM;
 
 public class Util {
 	
-	
-	
 	public static String getApplicationResource(){
 		return getPlatformIdentifier(Application.getContext().getPlatform())+"_"+Application.getContext().getApplicationName()+"_"+Application.getContext().getVersion()+"_";
 	}
@@ -102,6 +100,11 @@ public class Util {
 		else{
 			return null;
 		}
+	}
+	
+	public static String getContactFromId(String id){
+		String parts[] = id.split("/");
+		return parts[0];
 	}
 	
 	private static String getPlatformIdentifier(PLATFORM platform){
