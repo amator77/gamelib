@@ -30,21 +30,15 @@ import com.cyp.transport.xmpp.XMPPMessage;
 import com.cyp.transport.xmpp.XMPPPresence;
 import com.cyp.transport.xmpp.XMPPRoster;
 
-/**
- * XMPP Google Connection using MD-DIGEST for auth
- * 
- * @author leo
- * 
- */
-public class XMPPMD5Connection implements Connection,
+public class GtalkConnection implements Connection,
 		org.jivesoftware.smack.ConnectionListener {
 
 	private static final String TAG = "XMPPConnectionManager";
 
 	private XMPPConnection xmppConnection;
-	
+
 	private ConnectionConfiguration configuration;
-	
+
 	private List<ConnectionListener> listeners;
 
 	private String user;
@@ -53,9 +47,9 @@ public class XMPPMD5Connection implements Connection,
 
 	private static final Logger Log = Application.getContext().getLogger();
 
-	public XMPPMD5Connection() {
+	public GtalkConnection(ConnectionConfiguration configuration) {
 		this.listeners = new ArrayList<ConnectionListener>();
-		configuration = XMPPConfigurationManager.createMD5Configuration();
+		this.configuration = configuration;
 	}
 
 	public boolean isConnected() {
@@ -187,7 +181,7 @@ public class XMPPMD5Connection implements Connection,
 
 				for (ConnectionListener listener : listeners) {
 					listener.messageReceived(
-							XMPPMD5Connection.this,
+							GtalkConnection.this,
 							new XMPPMessage(
 									(org.jivesoftware.smack.packet.Message) packet));
 				}
@@ -203,13 +197,14 @@ public class XMPPMD5Connection implements Connection,
 			Presence presence = (Presence) packet;
 			String resource = Util.getResourceFromId(presence.getFrom());
 			String contact = Util.getContactFromId(presence.getFrom());
-			Log.debug(TAG, "Resource :" +resource +" Contact :"+contact);
+			Log.debug(TAG, "Resource :" + resource + " Contact :" + contact);
 			XMPPPresence xmppPresence = new XMPPPresence(presence);
-			
+
 			for (XMPPContact xmppContact : roster.getContacts()) {
 				if (xmppContact.getId().startsWith(contact)) {
 					xmppContact.setPresense(xmppPresence);
-					xmppContact.updateResource(resource != null ? resource : "");
+					xmppContact
+							.updateResource(resource != null ? resource : "");
 				}
 			}
 
