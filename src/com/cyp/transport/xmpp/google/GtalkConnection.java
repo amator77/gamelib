@@ -30,7 +30,7 @@ import com.cyp.transport.xmpp.XMPPMessage;
 import com.cyp.transport.xmpp.XMPPPresence;
 import com.cyp.transport.xmpp.XMPPRoster;
 
-public class GtalkConnection implements Connection,
+public class GTalkConnection implements Connection,
 		org.jivesoftware.smack.ConnectionListener {
 
 	private static final String TAG = "XMPPConnectionManager";
@@ -47,7 +47,7 @@ public class GtalkConnection implements Connection,
 
 	private static final Logger Log = Application.getContext().getLogger();
 
-	public GtalkConnection(ConnectionConfiguration configuration) {
+	public GTalkConnection(ConnectionConfiguration configuration) {
 		this.listeners = new ArrayList<ConnectionListener>();
 		this.configuration = configuration;
 	}
@@ -181,7 +181,7 @@ public class GtalkConnection implements Connection,
 
 				for (ConnectionListener listener : listeners) {
 					listener.messageReceived(
-							GtalkConnection.this,
+							GTalkConnection.this,
 							new XMPPMessage(
 									(org.jivesoftware.smack.packet.Message) packet));
 				}

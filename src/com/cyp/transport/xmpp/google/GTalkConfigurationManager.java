@@ -25,7 +25,7 @@ import com.cyp.application.Application;
 import com.cyp.application.Context.PLATFORM;
 import com.cyp.transport.xmpp.PingExtension;
 
-public class XMPPConfigurationManager {
+public class GTalkConfigurationManager {
 	
 	private static final String GTALK_HOST = "talk.google.com";
 
