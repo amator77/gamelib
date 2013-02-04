@@ -24,7 +24,13 @@ public interface Contact {
 	 * @return
 	 */
 	public Presence getPresence();
-
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public byte[] getAvatar();
+	
 	/**
 	 * Get the contact client running platform.
 	 * 

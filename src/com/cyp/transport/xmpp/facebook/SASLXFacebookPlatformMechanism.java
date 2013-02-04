@@ -1,4 +1,4 @@
-package com.cyp.transport.xmpp;
+package com.cyp.transport.xmpp.facebook;
 
 import java.io.IOException;
 import java.net.URLEncoder;

@@ -14,7 +14,9 @@ public class XMPPContact implements Contact {
 	private String resource;
 
 	private XMPPPresence presense;
-
+	
+	private byte[] avatar;
+	
 	public XMPPContact(String id, String name, XMPPPresence presense) {
 		this.id = id;
 		this.name = name;
@@ -61,5 +63,13 @@ public class XMPPContact implements Contact {
 
 	public String getClientType() {
 		return Util.getClientType(this.resource);
+	}
+			
+	public void setAvatar(byte[] avatar) {
+		this.avatar = avatar;
+	}
+
+	public byte[] getAvatar() {	
+		return this.avatar;
 	}
 }

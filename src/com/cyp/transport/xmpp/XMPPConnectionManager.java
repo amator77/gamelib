@@ -30,6 +30,8 @@ import org.jivesoftware.smackx.pubsub.provider.ItemProvider;
 import org.jivesoftware.smackx.pubsub.provider.ItemsProvider;
 import org.jivesoftware.smackx.pubsub.provider.PubSubProvider;
 
+import com.cyp.transport.xmpp.facebook.SASLXFacebookPlatformMechanism;
+
 public class XMPPConnectionManager implements ConnectionListener,
 		RosterListener {
 

@@ -41,7 +41,7 @@ public class GTalkConnection implements Connection,
 
 	private List<ConnectionListener> listeners;
 
-	private String user;
+	private String accountId;
 
 	private XMPPRoster roster;
 
@@ -51,7 +51,11 @@ public class GTalkConnection implements Connection,
 		this.listeners = new ArrayList<ConnectionListener>();
 		this.configuration = configuration;
 	}
-
+	
+	public String getAccountId() {
+		return this.accountId;
+	}
+	
 	public boolean isConnected() {
 		return this.xmppConnection != null && this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated();
@@ -89,9 +93,9 @@ public class GTalkConnection implements Connection,
 		try {
 			xmppConnection
 					.login(id, credentials, Util.getApplicationResource());
-			this.user = xmppConnection.getUser();
+			this.accountId = xmppConnection.getUser();
 			this.roster = new XMPPRoster(xmppConnection.getRoster());
-			Log.debug(TAG, "Success on login as :" + this.user);
+			Log.debug(TAG, "Success on login as :" + this.accountId);
 		} catch (XMPPException e) {
 			Log.error(TAG, "Error on login", e);
 			throw new LoginException("Error on login!", e);
@@ -103,7 +107,7 @@ public class GTalkConnection implements Connection,
 			this.xmppConnection.disconnect();
 			this.xmppConnection.removeConnectionListener(this);
 			this.xmppConnection = null;
-			this.user = null;
+			this.accountId = null;
 		}
 	}
 
