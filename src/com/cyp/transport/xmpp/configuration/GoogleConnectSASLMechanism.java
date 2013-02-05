@@ -1,4 +1,4 @@
-package com.cyp.transport.xmpp.google;
+package com.cyp.transport.xmpp.configuration;
 
 import java.io.IOException;
 

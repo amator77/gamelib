@@ -1,6 +1,5 @@
 package com.cyp.transport;
 
-import com.cyp.application.Context.PLATFORM;
 
 public interface Contact {
 	
@@ -32,23 +31,8 @@ public interface Contact {
 	public byte[] getAvatar();
 	
 	/**
-	 * Get the contact client running platform.
 	 * 
 	 * @return
 	 */
-	public PLATFORM getClientPlatform();
-
-	/**
-	 * The contact client version.
-	 * 
-	 * @return
-	 */
-	public String getClientVersion();
-
-	/**
-	 * The contact client type.
-	 * 
-	 * @return
-	 */
-	public String getClientType();
+	public boolean  isCompatible();
 }

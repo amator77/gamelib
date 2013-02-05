@@ -17,6 +17,8 @@ public class XMPPContact implements Contact {
 	
 	private byte[] avatar;
 	
+	private boolean compatible;
+	
 	public XMPPContact(String id, String name, XMPPPresence presense) {
 		this.id = id;
 		this.name = name;
@@ -71,5 +73,13 @@ public class XMPPContact implements Contact {
 
 	public byte[] getAvatar() {	
 		return this.avatar;
+	}
+
+	public boolean isCompatible() {
+		return compatible;
+	}
+
+	public void setCompatible(boolean compatible) {
+		this.compatible = compatible;
 	}
 }

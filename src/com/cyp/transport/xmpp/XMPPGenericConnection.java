@@ -1,4 +1,4 @@
-package com.cyp.transport.xmpp.google;
+package com.cyp.transport.xmpp;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
 
 import com.cyp.application.Application;
 import com.cyp.application.Logger;
@@ -24,19 +25,16 @@ import com.cyp.transport.Presence.MODE;
 import com.cyp.transport.RosterListener;
 import com.cyp.transport.Util;
 import com.cyp.transport.exceptions.LoginException;
-import com.cyp.transport.xmpp.PingExtension;
-import com.cyp.transport.xmpp.XMPPContact;
-import com.cyp.transport.xmpp.XMPPMessage;
-import com.cyp.transport.xmpp.XMPPPresence;
-import com.cyp.transport.xmpp.XMPPRoster;
 
-public class GTalkConnection implements Connection,
+public class XMPPGenericConnection implements Connection,
 		org.jivesoftware.smack.ConnectionListener {
 
 	private static final String TAG = "XMPPConnectionManager";
 
 	private XMPPConnection xmppConnection;
-
+	
+	private ServiceDiscoveryManager sdm;
+	
 	private ConnectionConfiguration configuration;
 
 	private List<ConnectionListener> listeners;
@@ -47,7 +45,7 @@ public class GTalkConnection implements Connection,
 
 	private static final Logger Log = Application.getContext().getLogger();
 
-	public GTalkConnection(ConnectionConfiguration configuration) {
+	public XMPPGenericConnection(ConnectionConfiguration configuration) {
 		this.listeners = new ArrayList<ConnectionListener>();
 		this.configuration = configuration;
 	}
@@ -78,12 +76,12 @@ public class GTalkConnection implements Connection,
 				xmppConnection.connect();
 				xmppConnection.addConnectionListener(this);
 				xmppConnection.addPacketListener(new PingListener(),
-						new PacketTypeFilter(PingExtension.class));
+						new PacketTypeFilter(XMPPPingExtension.class));
 				xmppConnection.addPacketListener(new PresenceListener(),
 						new PacketTypeFilter(Presence.class));
 				xmppConnection.addPacketListener(new MessageListener(),
 						new PacketTypeFilter(
-								org.jivesoftware.smack.packet.Message.class));
+								org.jivesoftware.smack.packet.Message.class));												
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
 				throw new IOException("Error on coonecting!", e);
@@ -92,10 +90,12 @@ public class GTalkConnection implements Connection,
 
 		try {
 			xmppConnection
-					.login(id, credentials, Util.getApplicationResource());
+					.login(id, credentials, Util.getApplicationResource());			
 			this.accountId = xmppConnection.getUser();
 			this.roster = new XMPPRoster(xmppConnection.getRoster());
 			Log.debug(TAG, "Success on login as :" + this.accountId);
+			sdm = new ServiceDiscoveryManager(xmppConnection);
+			sdm.addFeature("http://jabber.org/protocol/games/chess/v1");
 		} catch (XMPPException e) {
 			Log.error(TAG, "Error on login", e);
 			throw new LoginException("Error on login!", e);
@@ -185,7 +185,7 @@ public class GTalkConnection implements Connection,
 
 				for (ConnectionListener listener : listeners) {
 					listener.messageReceived(
-							GTalkConnection.this,
+							XMPPGenericConnection.this,
 							new XMPPMessage(
 									(org.jivesoftware.smack.packet.Message) packet));
 				}
@@ -209,23 +209,31 @@ public class GTalkConnection implements Connection,
 					xmppContact.setPresense(xmppPresence);
 					xmppContact
 							.updateResource(resource != null ? resource : "");
+					
+					if( !xmppContact.isCompatible() ){
+						try {
+							xmppContact.setCompatible(sdm.discoverInfo(packet.getFrom()).containsFeature("http://jabber.org/protocol/games/chess/v1"));							
+						} catch (XMPPException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 
 			for (RosterListener listener : roster.getListeners()) {
 				listener.presenceChanged(xmppPresence);
-			}
+			}			
 		}
 	}
 
 	private class PingListener implements PacketListener {
 
 		public void processPacket(Packet packet) {
-			if (!(packet instanceof PingExtension))
+			if (!(packet instanceof XMPPPingExtension))
 				return;
-			PingExtension p = (PingExtension) packet;
+			XMPPPingExtension p = (XMPPPingExtension) packet;
 			if (p.getType() == IQ.Type.GET) {
-				PingExtension pong = new PingExtension();
+				XMPPPingExtension pong = new XMPPPingExtension();
 				pong.setType(IQ.Type.RESULT);
 				pong.setTo(p.getFrom());
 				pong.setPacketID(p.getPacketID());

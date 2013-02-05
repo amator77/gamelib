@@ -1,4 +1,4 @@
-package com.cyp.transport.xmpp.google;
+package com.cyp.transport.xmpp.configuration;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +12,7 @@ import org.jivesoftware.smack.Roster.SubscriptionMode;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.proxy.ProxyInfo;
+import org.jivesoftware.smack.sasl.SASLDigestMD5Mechanism;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
 import org.jivesoftware.smackx.provider.DelayInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
@@ -23,9 +24,9 @@ import org.jivesoftware.smackx.pubsub.provider.PubSubProvider;
 
 import com.cyp.application.Application;
 import com.cyp.application.Context.PLATFORM;
-import com.cyp.transport.xmpp.PingExtension;
+import com.cyp.transport.xmpp.XMPPPingExtension;
 
-public class GTalkConfigurationManager {
+public class ConfigurationManager {
 	
 	private static final String GTALK_HOST = "talk.google.com";
 
@@ -33,12 +34,16 @@ public class GTalkConfigurationManager {
 	
 	private static final String GTALK_SERVICE = "gtalk";
 	
-	public static ConnectionConfiguration createMD5Configuration(){
+	private static final String FACEBOOK_HOST = "chat.facebook.com";
+
+	private static final int FACEBOOK_PORT = 5222;
+	
+	public static ConnectionConfiguration createGTalkMD5Configuration(){
 		ConnectionConfiguration configuration = new ConnectionConfiguration(GTALK_HOST, GTALK_PORT,
 				GTALK_SERVICE, ProxyInfo.forNoProxy());
 		configuration.setSecurityMode(SecurityMode.enabled);
 		configuration.setDebuggerEnabled(true);
-		configuration.setRosterLoadedAtLogin(true);
+		configuration.setRosterLoadedAtLogin(true);		
 		configuration.setSendPresence(true);
 		Roster.setDefaultSubscriptionMode(SubscriptionMode.manual);
 
@@ -51,7 +56,26 @@ public class GTalkConfigurationManager {
 		return configuration;
 	}
 	
-	public static ConnectionConfiguration createOauth2Configuration(){
+	public static ConnectionConfiguration createFacebookkMD5Configuration(){
+		ConnectionConfiguration configuration = new ConnectionConfiguration(FACEBOOK_HOST,FACEBOOK_PORT);
+		SASLAuthentication.registerSASLMechanism("DIGEST-MD5", MySASLDigestMD5Mechanism.class);
+	    configuration.setSASLAuthenticationEnabled(true);
+		configuration.setSecurityMode(SecurityMode.enabled);
+		configuration.setDebuggerEnabled(true);
+		configuration.setSendPresence(true);
+		configuration.setRosterLoadedAtLogin(true);		
+		Roster.setDefaultSubscriptionMode(SubscriptionMode.manual);
+
+		if (Application.getContext().getPlatform() == PLATFORM.MOBILE_ANDROID) {
+			configuration.setTruststoreType("BKS");
+			configuration.setTruststorePath(getCacertsPath());
+			configurePM(ProviderManager.getInstance());
+		}
+		
+		return configuration;
+	}
+	
+	public static ConnectionConfiguration createGTalkOauth2Configuration(){
 		ConnectionConfiguration configuration = new ConnectionConfiguration(GTALK_HOST, GTALK_PORT,
 				GTALK_SERVICE, ProxyInfo.forNoProxy());
 		
@@ -59,11 +83,10 @@ public class GTalkConfigurationManager {
 		SASLAuthentication.supportSASLMechanism("X-OAUTH2", 0);
 		configuration.setSASLAuthenticationEnabled(true);
 		configuration.setSecurityMode(SecurityMode.enabled);
-		configuration.setReconnectionAllowed(true);
-		
+		configuration.setReconnectionAllowed(true);		
 		configuration.setDebuggerEnabled(true);
-		configuration.setRosterLoadedAtLogin(true);
 		configuration.setSendPresence(true);
+		configuration.setRosterLoadedAtLogin(true);		
 		Roster.setDefaultSubscriptionMode(SubscriptionMode.manual);
 
 		if (Application.getContext().getPlatform() == PLATFORM.MOBILE_ANDROID) {
@@ -75,8 +98,28 @@ public class GTalkConfigurationManager {
 		return configuration;
 	}
 	
-	private static void configurePM(ProviderManager pm) {
+	public static ConnectionConfiguration createFacebookOauth2Configuration(){
+		
+		ConnectionConfiguration config = new ConnectionConfiguration(FACEBOOK_HOST,FACEBOOK_PORT);
+		config.setSASLAuthenticationEnabled(true);
+	    config.setDebuggerEnabled(true);	        	        		
+	    SASLAuthentication.registerSASLMechanism(SASLXFacebookPlatformMechanism.NAME, SASLXFacebookPlatformMechanism.class);
+	    SASLAuthentication.supportSASLMechanism(SASLXFacebookPlatformMechanism.NAME, 0);
+	    config.setSecurityMode(SecurityMode.enabled);	    
+	    config.setSendPresence(false);	       
+	    	     		
+		if (Application.getContext().getPlatform() == PLATFORM.MOBILE_ANDROID) {
+			config.setTruststoreType("BKS");
+			config.setTruststorePath(getCacertsPath());
+			configurePM(ProviderManager.getInstance());
+		}
+		
+		return config;
+	}
 	
+	
+	private static void configurePM(ProviderManager pm) {
+		
 		pm.addIQProvider("query", "http://jabber.org/protocol/disco#items",
 				new DiscoverItemsProvider());
 		pm.addIQProvider("query", "http://jabber.org/protocol/disco#info",
@@ -112,8 +155,8 @@ public class GTalkConfigurationManager {
 				"http://jabber.org/protocol/pubsub#event", new ItemProvider());
 		pm.addExtensionProvider("event",
 				"http://jabber.org/protocol/pubsub#event", new EventProvider());
-		pm.addIQProvider(PingExtension.ELEMENT, PingExtension.NAMESPACE,
-				PingExtension.class);
+		pm.addIQProvider(XMPPPingExtension.ELEMENT, XMPPPingExtension.NAMESPACE,
+				XMPPPingExtension.class);
 	}
 
 	

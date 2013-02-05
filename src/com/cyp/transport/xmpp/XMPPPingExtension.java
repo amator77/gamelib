@@ -2,7 +2,7 @@ package com.cyp.transport.xmpp;
 
 import org.jivesoftware.smack.packet.IQ;
 
-public class PingExtension extends IQ {
+public class XMPPPingExtension extends IQ {
 
 	/** Namespace of the Ping XEP. */
 	public static final String NAMESPACE = "urn:xmpp:ping";
@@ -13,7 +13,7 @@ public class PingExtension extends IQ {
 	/**
 	 * Create a ping iq packet.
 	 */
-	public PingExtension() {
+	public XMPPPingExtension() {
 	}
 
 	@Override
