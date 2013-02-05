@@ -15,6 +15,7 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.packet.DiscoverInfo;
 
 import com.cyp.application.Application;
 import com.cyp.application.Logger;
@@ -32,9 +33,9 @@ public class XMPPGenericConnection implements Connection,
 	private static final String TAG = "XMPPConnectionManager";
 
 	private XMPPConnection xmppConnection;
-	
+
 	private ServiceDiscoveryManager sdm;
-	
+
 	private ConnectionConfiguration configuration;
 
 	private List<ConnectionListener> listeners;
@@ -49,11 +50,11 @@ public class XMPPGenericConnection implements Connection,
 		this.listeners = new ArrayList<ConnectionListener>();
 		this.configuration = configuration;
 	}
-	
+
 	public String getAccountId() {
 		return this.accountId;
 	}
-	
+
 	public boolean isConnected() {
 		return this.xmppConnection != null && this.xmppConnection.isConnected()
 				&& this.xmppConnection.isAuthenticated();
@@ -81,7 +82,10 @@ public class XMPPGenericConnection implements Connection,
 						new PacketTypeFilter(Presence.class));
 				xmppConnection.addPacketListener(new MessageListener(),
 						new PacketTypeFilter(
-								org.jivesoftware.smack.packet.Message.class));												
+								org.jivesoftware.smack.packet.Message.class));
+				xmppConnection.addPacketListener(new DiscoveryListener(),
+						new PacketTypeFilter(
+								org.jivesoftware.smack.packet.IQ.class));
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
 				throw new IOException("Error on coonecting!", e);
@@ -90,12 +94,20 @@ public class XMPPGenericConnection implements Connection,
 
 		try {
 			xmppConnection
-					.login(id, credentials, Util.getApplicationResource());			
+					.login(id, credentials, Util.getApplicationResource());
 			this.accountId = xmppConnection.getUser();
 			this.roster = new XMPPRoster(xmppConnection.getRoster());
 			Log.debug(TAG, "Success on login as :" + this.accountId);
-			sdm = new ServiceDiscoveryManager(xmppConnection);
-			sdm.addFeature("http://jabber.org/protocol/games/chess/v1");
+
+			List<String> futures = Application.getContext()
+					.getApplicationFutures();
+			if (futures != null && futures.size() > 0) {
+				sdm = new ServiceDiscoveryManager(xmppConnection);
+
+				for (String future : futures) {
+					sdm.addFeature(future);
+				}
+			}
 		} catch (XMPPException e) {
 			Log.error(TAG, "Error on login", e);
 			throw new LoginException("Error on login!", e);
@@ -193,6 +205,41 @@ public class XMPPGenericConnection implements Connection,
 		}
 	}
 
+	private class DiscoveryListener implements PacketListener {
+
+		public void processPacket(Packet packet) {
+			if (packet instanceof org.jivesoftware.smackx.packet.DiscoverInfo) {
+				Log.debug(TAG, "Discovery info received :" + packet.toXML());
+				handleDiscoveryInfoPachet((DiscoverInfo) packet);
+			}
+		}
+	}
+
+	private void handleDiscoveryInfoPachet(DiscoverInfo discInfo) {
+		boolean match = false;
+		for (String future : Application.getContext().getApplicationFutures()) {
+			match = discInfo.containsFeature(future);
+
+			if (!match) {
+				break;
+			}
+		}
+
+		for (XMPPContact xmppContact : roster.getContacts()) {
+			if (xmppContact.getId().startsWith(
+					Util.getContactFromId(discInfo.getFrom()))) {
+
+				if (!xmppContact.isCompatible()) {
+					xmppContact.setCompatible(match);
+
+					for (RosterListener listener : roster.getListeners()) {
+						listener.contactUpdated(xmppContact);
+					}
+				}
+			}
+		}
+	}
+
 	private class PresenceListener implements PacketListener {
 		public void processPacket(Packet packet) {
 			if (!(packet instanceof Presence))
@@ -201,28 +248,43 @@ public class XMPPGenericConnection implements Connection,
 			Presence presence = (Presence) packet;
 			String resource = Util.getResourceFromId(presence.getFrom());
 			String contact = Util.getContactFromId(presence.getFrom());
-			Log.debug(TAG, "Resource :" + resource + " Contact :" + contact);
 			XMPPPresence xmppPresence = new XMPPPresence(presence);
 
 			for (XMPPContact xmppContact : roster.getContacts()) {
+
 				if (xmppContact.getId().startsWith(contact)) {
-					xmppContact.setPresense(xmppPresence);
-					xmppContact
-							.updateResource(resource != null ? resource : "");
-					
-					if( !xmppContact.isCompatible() ){
-						try {
-							xmppContact.setCompatible(sdm.discoverInfo(packet.getFrom()).containsFeature("http://jabber.org/protocol/games/chess/v1"));							
-						} catch (XMPPException e) {
-							e.printStackTrace();
+
+					if (xmppContact.getId().equals(presence.getFrom())) {
+						xmppContact.setPresense(xmppPresence);
+						
+						if( presence.getType() == Presence.Type.unavailable){
+							xmppContact.setCompatible(false);
+							xmppContact.setResource("");
+						}
+					} else {
+				
+						if (!xmppContact.isCompatible()) {
+							xmppContact.setPresense(xmppPresence);
+							xmppContact.setResource(resource != null ? resource
+									: "");
+							try {
+								DiscoverInfo discInfo = sdm.discoverInfo(packet
+										.getFrom());
+								handleDiscoveryInfoPachet(discInfo);
+							} catch (XMPPException e) {
+								e.printStackTrace();
+							}
 						}
 					}
+
+					break;
 				}
+
 			}
 
 			for (RosterListener listener : roster.getListeners()) {
 				listener.presenceChanged(xmppPresence);
-			}			
+			}
 		}
 	}
 

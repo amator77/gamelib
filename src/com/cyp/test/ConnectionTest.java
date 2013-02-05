@@ -82,4 +82,8 @@ public class ConnectionTest implements Context {
 //		conn.login("438318006237702", "AAAGOpd0PegYBAIttbQNG4QruBSbdNu3XbdcggrDZAf1UmCciI0X83VQl2c7NpEfPaHmFTGK0ZAq1FzqDX0uvBN3cA8toslveH6V3zy7QZDZD");
 //		
 	}
+
+	public List<String> getApplicationFutures() {		
+		return new ArrayList<String>();
+	}
 }

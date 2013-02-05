@@ -35,4 +35,6 @@ public interface Context {
 	public String getVersion();
 	
 	public PLATFORM getPlatform();	
+	
+	public List<String> getApplicationFutures();
 }

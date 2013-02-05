@@ -45,7 +45,7 @@ public class XMPPContact implements Contact {
 		return name;
 	}
 
-	public void updateResource(String resource) {
+	public void setResource(String resource) {
 		this.resource = resource;
 		String[] parts = this.id.split("/");
 		this.id = parts[0] + ( (resource != null && resource.trim().length() > 0 ) ? ("/"+resource) : ""  );
@@ -81,5 +81,9 @@ public class XMPPContact implements Contact {
 
 	public void setCompatible(boolean compatible) {
 		this.compatible = compatible;
+	}
+
+	public String getResource() {
+		return resource;
 	}
 }
