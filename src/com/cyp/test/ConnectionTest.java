@@ -86,4 +86,10 @@ public class ConnectionTest implements Context {
 	public List<String> getApplicationFutures() {		
 		return new ArrayList<String>();
 	}
+
+	public void registerAccount(Account account) {		
+	}
+
+	public void removeAccount(Account account) { 
+	}
 }

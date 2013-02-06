@@ -30,6 +30,10 @@ public interface Context {
 	
 	public List<Account> listAccounts();
 	
+	public void registerAccount(Account account);
+	
+	public void removeAccount(Account account);
+	
 	public String getApplicationName();
 	
 	public String getVersion();
