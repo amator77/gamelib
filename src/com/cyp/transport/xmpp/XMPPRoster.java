@@ -18,7 +18,7 @@ public class XMPPRoster implements Roster {
 		this.contacts = new ArrayList<XMPPContact>();
 
 		for (RosterEntry entry : roster.getEntries()) {
-			contacts.add(new XMPPContact(entry.getUser(), entry.getName()));
+			contacts.add(new XMPPContact(this,entry.getUser(), entry.getName()));
 		}
 
 		this.listeners = new ArrayList<RosterListener>();

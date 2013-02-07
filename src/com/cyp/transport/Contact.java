@@ -9,7 +9,7 @@ public interface Contact {
 	 * @return
 	 */
 	public String getId();
-
+	
 	/**
 	 * Contact name.
 	 * 

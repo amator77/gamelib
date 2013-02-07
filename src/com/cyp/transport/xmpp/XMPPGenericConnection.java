@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
@@ -85,7 +86,8 @@ public class XMPPGenericConnection implements Connection,
 								org.jivesoftware.smack.packet.Message.class));
 				xmppConnection.addPacketListener(new DiscoveryListener(),
 						new PacketTypeFilter(
-								org.jivesoftware.smack.packet.IQ.class));
+								org.jivesoftware.smack.packet.IQ.class));				
+				
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
 				throw new IOException("Error on coonecting!", e);
@@ -108,6 +110,12 @@ public class XMPPGenericConnection implements Connection,
 					sdm.addFeature(future);
 				}
 			}
+			
+			XMPPAvatarManager.getManager().start();
+			for( XMPPContact contact : this.roster.getContacts()){
+				XMPPAvatarManager.getManager().loadAvatar(contact, xmppConnection);
+			}
+			
 		} catch (XMPPException e) {
 			Log.error(TAG, "Error on login", e);
 			throw new LoginException("Error on login!", e);

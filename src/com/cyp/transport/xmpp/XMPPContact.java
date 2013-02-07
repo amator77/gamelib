@@ -3,6 +3,7 @@ package com.cyp.transport.xmpp;
 import com.cyp.application.Context.PLATFORM;
 import com.cyp.transport.Contact;
 import com.cyp.transport.Presence;
+import com.cyp.transport.RosterListener;
 import com.cyp.transport.Util;
 
 public class XMPPContact implements Contact {
@@ -19,18 +20,21 @@ public class XMPPContact implements Contact {
 	
 	private boolean compatible;
 	
-	public XMPPContact(String id, String name, XMPPPresence presense) {
+	private XMPPRoster roster;
+	
+	public XMPPContact( XMPPRoster roster , String id, String name, XMPPPresence presense) {
+		this.roster = roster;
 		this.id = id;
 		this.name = name;
 		this.presense = presense;
 	}
 
-	public XMPPContact(String id, String name) {
-		this(id, name, new XMPPPresence(null));
+	public XMPPContact(XMPPRoster roster , String id, String name) {
+		this( roster , id, name, new XMPPPresence(null));
 	}
 
-	public XMPPContact(String id) {
-		this(id, null, new XMPPPresence(null));
+	public XMPPContact(XMPPRoster roster , String id) {
+		this( roster, id, null, new XMPPPresence(null));
 	}
 
 	public Presence getPresence() {
@@ -69,6 +73,10 @@ public class XMPPContact implements Contact {
 			
 	public void setAvatar(byte[] avatar) {
 		this.avatar = avatar;
+		
+		for( RosterListener listener :  this.roster.getListeners()){
+			listener.contactUpdated(this);
+		}		
 	}
 
 	public byte[] getAvatar() {	
