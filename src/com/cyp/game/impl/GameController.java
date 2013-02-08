@@ -15,6 +15,7 @@ import com.cyp.game.IGameController;
 import com.cyp.game.IGameControllerListener;
 import com.cyp.transport.Connection;
 import com.cyp.transport.ConnectionListener;
+import com.cyp.transport.Contact;
 import com.cyp.transport.Message;
 
 public abstract class GameController implements IGameController, ConnectionListener {
@@ -82,10 +83,10 @@ public abstract class GameController implements IGameController, ConnectionListe
 		this.challenges.remove(challenge);
 	}
 
-	public IChallenge sendChallenge(String remoteId, Map<String, String> details)
+	public IChallenge sendChallenge(Contact remoteContact, Map<String, String> details)
 			throws IOException {
-		GameChallenge gchallenge = new GameChallenge(this.account.getId(),
-				remoteId);
+		GameChallenge gchallenge = new GameChallenge(this.account.getConnection().getAccountId(),
+				remoteContact);
 		this.sendChallengeCommand(IGameCommand.CHALLENGE_COMMAND_ID, gchallenge);
 		this.challenges.add(gchallenge);
 		return gchallenge;
@@ -120,20 +121,20 @@ public abstract class GameController implements IGameController, ConnectionListe
 		return false;
 	}
 
-	private void handleChallengeCommand(int commandId, String accountId,
+	private void handleChallengeCommand(int commandId, String remoteId,
 			String utcTime) {
-		if (accountId != null && utcTime != null) {
+		if (remoteId != null && utcTime != null) {
 			log.debug(this.getClass().getName(), "New challange from :"
-					+ accountId + " , cmd :" + commandId);
+					+ remoteId + " , cmd :" + commandId);
 
 			try {
 				long time = Long.parseLong(utcTime);
-				IChallenge challenge = findChallenge(accountId, time);
+				IChallenge challenge = findChallenge(remoteId, time);
 
 				switch (commandId) {
 				case IGameCommand.CHALLENGE_COMMAND_ID:
-					GameChallenge gc = new GameChallenge(this.account.getId(),
-							accountId, time);
+					GameChallenge gc = new GameChallenge(this.account.getConnection().getAccountId(),
+							findContact(remoteId), time);
 					this.challenges.add(gc);
 
 					for (IGameControllerListener listener : this.listeners) {
@@ -188,10 +189,10 @@ public abstract class GameController implements IGameController, ConnectionListe
 
 	}
 
-	private IChallenge findChallenge(String accountId, long time) {
+	private IChallenge findChallenge(String remoteId, long time) {
 		for (IChallenge challenge : this.challenges) {
 
-			if (challenge.getRemoteId().equals(accountId)
+			if (challenge.getRemoteContact().getId().equals(remoteId)
 					&& challenge.getTime() == time) {
 
 				return challenge;
@@ -200,7 +201,18 @@ public abstract class GameController implements IGameController, ConnectionListe
 
 		return null;
 	}
-
+	
+	private Contact findContact(String accountId) {
+		
+		for(Contact contact :  this.account.getRoster().getContacts()){
+			if( contact.getId().equals(accountId)){
+				return contact;
+			}
+		}				
+		
+		return null;
+	}
+	
 	private void sendCommand(GenericSendGameCommand cmd) throws IOException {
 		log.debug(this.getClass().getName(),
 				"Send command :" + cmd.toString());
@@ -213,7 +225,7 @@ public abstract class GameController implements IGameController, ConnectionListe
 	private void sendChallengeCommand(int commandId, IChallenge challenge)
 			throws IOException {
 		GenericSendGameCommand cmd = new GenericSendGameCommand(commandId);
-		cmd.setTo(challenge.getRemoteId());
+		cmd.setTo(challenge.getRemoteContact().getId());
 		cmd.setHeader(IGameCommand.GAME_COMMAND_HEADER_KEY,
 				String.valueOf(commandId));
 		cmd.setHeader(IChallenge.HEADER_TIME_KEY,

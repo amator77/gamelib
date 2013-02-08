@@ -2,6 +2,8 @@ package com.cyp.game;
 
 import java.util.Map;
 
+import com.cyp.transport.Contact;
+
 public interface IChallenge {
 	
 	public static final String HEADER_ID_KEY = "id";
@@ -12,7 +14,7 @@ public interface IChallenge {
 	 * The remote account id
 	 * @return
 	 */
-	public String getRemoteId();
+	public Contact getRemoteContact();
 	
 	/**
 	 * The local account id

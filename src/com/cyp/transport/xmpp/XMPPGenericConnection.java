@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
@@ -17,6 +16,7 @@ import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
+import org.jivesoftware.smackx.packet.VCard;
 
 import com.cyp.application.Application;
 import com.cyp.application.Logger;
@@ -44,7 +44,9 @@ public class XMPPGenericConnection implements Connection,
 	private String accountId;
 
 	private XMPPRoster roster;
-
+	
+	private VCard accountVCard;
+	
 	private static final Logger Log = Application.getContext().getLogger();
 
 	public XMPPGenericConnection(ConnectionConfiguration configuration) {
@@ -116,6 +118,8 @@ public class XMPPGenericConnection implements Connection,
 				XMPPAvatarManager.getManager().loadAvatar(contact, xmppConnection);
 			}
 			
+			accountVCard = new VCard();
+			accountVCard.load(xmppConnection);						
 		} catch (XMPPException e) {
 			Log.error(TAG, "Error on login", e);
 			throw new LoginException("Error on login!", e);
@@ -259,19 +263,19 @@ public class XMPPGenericConnection implements Connection,
 			XMPPPresence xmppPresence = new XMPPPresence(presence);
 
 			for (XMPPContact xmppContact : roster.getContacts()) {
-
+				
 				if (xmppContact.getId().startsWith(contact)) {
 
-					if (xmppContact.getId().equals(presence.getFrom())) {
+					if (xmppContact.getId().equals(presence.getFrom())) {						
 						xmppContact.setPresense(xmppPresence);
 						
 						if( presence.getType() == Presence.Type.unavailable){
 							xmppContact.setCompatible(false);
 							xmppContact.setResource("");
 						}
-					} else {
-				
-						if (!xmppContact.isCompatible()) {
+					} else {												
+						
+						if (!xmppContact.isCompatible()) {							
 							xmppContact.setPresense(xmppPresence);
 							xmppContact.setResource(resource != null ? resource
 									: "");
@@ -282,7 +286,7 @@ public class XMPPGenericConnection implements Connection,
 							} catch (XMPPException e) {
 								e.printStackTrace();
 							}
-						}
+						}						
 					}
 
 					break;
@@ -338,5 +342,9 @@ public class XMPPGenericConnection implements Connection,
 		}
 
 		return p;
+	}
+
+	public byte[] getAvatar() {		
+		return this.accountVCard.getAvatar();
 	}
 }

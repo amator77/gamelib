@@ -5,10 +5,11 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import com.cyp.game.IChallenge;
+import com.cyp.transport.Contact;
 
 public class GameChallenge implements IChallenge {
 
-	private String remoteId;
+	private Contact remoteContact;
 
 	private String localId;
 
@@ -16,25 +17,25 @@ public class GameChallenge implements IChallenge {
 
 	private boolean received;
 	
-	public GameChallenge(String localId, String remoteId) {
-		this(localId, remoteId, Calendar.getInstance(TimeZone
+	public GameChallenge(String localId, Contact remoteContact) {
+		this(localId, remoteContact, Calendar.getInstance(TimeZone
 				.getTimeZone("UTC")).getTimeInMillis(), false);
 	}
 
-	public GameChallenge(String localId, String remoteId, long time) {
-		this(localId, remoteId, time, true);
+	public GameChallenge(String localId, Contact remoteContact, long time) {
+		this(localId, remoteContact, time, true);
 	}
 
-	public GameChallenge(String localId, String remoteId, long time,
+	public GameChallenge(String localId, Contact remoteContact , long time,
 			boolean received) {
 		this.localId = localId;
-		this.remoteId = remoteId;
+		this.remoteContact = remoteContact;
 		this.time = time;
 		this.received = received;
 	}
 
-	public String getRemoteId() {
-		return this.remoteId;
+	public Contact getRemoteContact() {
+		return this.remoteContact;
 	}
 
 	public String getLocalId() {
@@ -55,7 +56,7 @@ public class GameChallenge implements IChallenge {
 
 	@Override
 	public String toString() {
-		return "GameChallenge [remoteId=" + remoteId + ", localId=" + localId
+		return "GameChallenge [remoteId=" + remoteContact + ", localId=" + localId
 				+ ", time=" + time + ", received=" + received + "]";
 	}
 
@@ -66,7 +67,7 @@ public class GameChallenge implements IChallenge {
 		result = prime * result + ((localId == null) ? 0 : localId.hashCode());
 		result = prime * result + (received ? 1231 : 1237);
 		result = prime * result
-				+ ((remoteId == null) ? 0 : remoteId.hashCode());
+				+ ((remoteContact == null) ? 0 : remoteContact.hashCode());
 		result = prime * result + (int) (time ^ (time >>> 32));
 		return result;
 	}
@@ -87,10 +88,10 @@ public class GameChallenge implements IChallenge {
 			return false;
 		if (received != other.received)
 			return false;
-		if (remoteId == null) {
-			if (other.remoteId != null)
+		if (remoteContact == null) {
+			if (other.remoteContact != null)
 				return false;
-		} else if (!remoteId.equals(other.remoteId))
+		} else if (!remoteContact.equals(other.remoteContact))
 			return false;
 		if (time != other.time)
 			return false;

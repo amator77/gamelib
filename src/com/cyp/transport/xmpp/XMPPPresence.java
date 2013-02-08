@@ -36,7 +36,7 @@ public class XMPPPresence implements Presence {
 			return this.xmppPresence.getStatus();
 		}
 		else{
-			return "unknown";
+			return "";
 		}
 	}
 

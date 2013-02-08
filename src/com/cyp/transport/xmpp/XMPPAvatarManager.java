@@ -49,7 +49,10 @@ public class XMPPAvatarManager implements Runnable {
 	
 	public void loadAvatar(XMPPContact contact, XMPPConnection connection){		
 		this.jobs.add(new Job(contact, connection));
-		lock.notify();
+		
+		synchronized(lock){
+			lock.notify();
+		}
 	}
 	
 	public synchronized void start(){

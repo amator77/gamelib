@@ -9,11 +9,9 @@ public interface Account {
 	public enum TYPE { XMPP_GOOGLE , XMPP_FACEBOOK }
 	
 	public enum STATUS { ONLINE , AWAY , BUSY , OFFLINE }
-	
-	public String getId();
-	
+		
 	public Roster getRoster();
-	
+			
 	public TYPE getType();
 	
 	public STATUS getStatus();

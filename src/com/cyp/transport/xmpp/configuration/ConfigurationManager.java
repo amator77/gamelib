@@ -12,11 +12,11 @@ import org.jivesoftware.smack.Roster.SubscriptionMode;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.proxy.ProxyInfo;
-import org.jivesoftware.smack.sasl.SASLDigestMD5Mechanism;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
 import org.jivesoftware.smackx.provider.DelayInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
+import org.jivesoftware.smackx.provider.VCardProvider;
 import org.jivesoftware.smackx.pubsub.provider.EventProvider;
 import org.jivesoftware.smackx.pubsub.provider.ItemProvider;
 import org.jivesoftware.smackx.pubsub.provider.ItemsProvider;
@@ -120,6 +120,7 @@ public class ConfigurationManager {
 	
 	private static void configurePM(ProviderManager pm) {
 		
+		pm.addIQProvider("vCard", "vcard-temp", new VCardProvider());
 		pm.addIQProvider("query", "http://jabber.org/protocol/disco#items",
 				new DiscoverItemsProvider());
 		pm.addIQProvider("query", "http://jabber.org/protocol/disco#info",

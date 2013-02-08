@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.cyp.accounts.Account;
+import com.cyp.transport.Contact;
 
 public interface IGameController {
 	
@@ -42,7 +43,7 @@ public interface IGameController {
 	 * @return
 	 * @throws IOException
 	 */
-	public IChallenge sendChallenge(String remoteId, Map<String, String> details)
+	public IChallenge sendChallenge(Contact remoteContact, Map<String, String> details)
 			throws IOException;
 	
 	/**

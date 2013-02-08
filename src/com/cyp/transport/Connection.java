@@ -14,6 +14,8 @@ public interface Connection {
 	
 	public String getAccountId();
 	
+	public byte[] getAvatar();
+	
 	public void login(String id,String credentials) throws IOException,LoginException;
 	
 	public void logout();
