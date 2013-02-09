@@ -86,9 +86,9 @@ public class XMPPGenericConnection implements Connection,
 				xmppConnection.addPacketListener(new MessageListener(),
 						new PacketTypeFilter(
 								org.jivesoftware.smack.packet.Message.class));
-				xmppConnection.addPacketListener(new DiscoveryListener(),
-						new PacketTypeFilter(
-								org.jivesoftware.smack.packet.IQ.class));				
+//				xmppConnection.addPacketListener(new DiscoveryListener(),
+//						new PacketTypeFilter(
+//								org.jivesoftware.smack.packet.IQ.class));				
 				
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
@@ -279,13 +279,15 @@ public class XMPPGenericConnection implements Connection,
 							xmppContact.setPresense(xmppPresence);
 							xmppContact.setResource(resource != null ? resource
 									: "");
-							try {
-								DiscoverInfo discInfo = sdm.discoverInfo(packet
-										.getFrom());
-								handleDiscoveryInfoPachet(discInfo);
-							} catch (XMPPException e) {
-								e.printStackTrace();
-							}
+//							try {
+//								DiscoverInfo discInfo = sdm.discoverInfo(packet
+//										.getFrom());
+//								handleDiscoveryInfoPachet(discInfo);
+//							} catch (XMPPException e) {
+//								e.printStackTrace();
+//							}
+							
+							xmppContact.setCompatible(Util.isCompatible(xmppContact));														
 						}						
 					}
 

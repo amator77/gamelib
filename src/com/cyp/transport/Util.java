@@ -3,6 +3,7 @@ package com.cyp.transport;
 import com.cyp.application.Application;
 import com.cyp.application.Context;
 import com.cyp.application.Context.PLATFORM;
+import com.cyp.transport.xmpp.XMPPContact;
 
 public class Util {
 	
@@ -118,5 +119,9 @@ public class Util {
 		default:
 			return Context.DESKTOP_JAVA;			
 		}
+	}
+
+	public static boolean isCompatible(XMPPContact xmppContact) {
+		return getPlatform(getResourceFromId(xmppContact.getId())) != PLATFORM.UNKNOWN;
 	}
 }
