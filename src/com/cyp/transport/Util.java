@@ -108,6 +108,11 @@ public class Util {
 		return parts[0];
 	}
 	
+	public static String getUsernameFromId(String id){
+		String parts[] = id.split("@");
+		return parts[0];
+	}
+	
 	private static String getPlatformIdentifier(PLATFORM platform){
 		switch (platform) {
 		case DESKTOP_JAVA : return Context.DESKTOP_JAVA;						

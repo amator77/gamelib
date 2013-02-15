@@ -25,4 +25,6 @@ public interface Connection {
 	public Roster getRoster();
 	
 	public boolean isConnected();
+	
+	public RoomsManager getRoomsManager();
 }

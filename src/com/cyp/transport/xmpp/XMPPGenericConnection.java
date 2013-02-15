@@ -14,8 +14,6 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.VCard;
 
 import com.cyp.application.Application;
@@ -24,6 +22,7 @@ import com.cyp.transport.Connection;
 import com.cyp.transport.ConnectionListener;
 import com.cyp.transport.Message;
 import com.cyp.transport.Presence.MODE;
+import com.cyp.transport.RoomsManager;
 import com.cyp.transport.RosterListener;
 import com.cyp.transport.Util;
 import com.cyp.transport.exceptions.LoginException;
@@ -31,11 +30,9 @@ import com.cyp.transport.exceptions.LoginException;
 public class XMPPGenericConnection implements Connection,
 		org.jivesoftware.smack.ConnectionListener {
 
-	private static final String TAG = "XMPPConnectionManager";
+	private static final String TAG = "XMPPGenericConnection";
 
-	private XMPPConnection xmppConnection;
-
-	private ServiceDiscoveryManager sdm;
+	private XMPPConnection xmppConnection;	
 
 	private ConnectionConfiguration configuration;
 
@@ -44,9 +41,11 @@ public class XMPPGenericConnection implements Connection,
 	private String accountId;
 
 	private XMPPRoster roster;
-	
+
 	private VCard accountVCard;
-	
+
+	private XMPPRoomsManager roomsManager;
+
 	private static final Logger Log = Application.getContext().getLogger();
 
 	public XMPPGenericConnection(ConnectionConfiguration configuration) {
@@ -86,10 +85,6 @@ public class XMPPGenericConnection implements Connection,
 				xmppConnection.addPacketListener(new MessageListener(),
 						new PacketTypeFilter(
 								org.jivesoftware.smack.packet.Message.class));
-//				xmppConnection.addPacketListener(new DiscoveryListener(),
-//						new PacketTypeFilter(
-//								org.jivesoftware.smack.packet.IQ.class));				
-				
 			} catch (XMPPException e) {
 				Log.error(TAG, "Error on connection", e);
 				throw new IOException("Error on coonecting!", e);
@@ -99,27 +94,19 @@ public class XMPPGenericConnection implements Connection,
 		try {
 			xmppConnection
 					.login(id, credentials, Util.getApplicationResource());
+			this.roomsManager = new XMPPRoomsManager(xmppConnection);
 			this.accountId = xmppConnection.getUser();
 			this.roster = new XMPPRoster(xmppConnection.getRoster());
 			Log.debug(TAG, "Success on login as :" + this.accountId);
 
-			List<String> futures = Application.getContext()
-					.getApplicationFutures();
-			if (futures != null && futures.size() > 0) {
-				sdm = new ServiceDiscoveryManager(xmppConnection);
-
-				for (String future : futures) {
-					sdm.addFeature(future);
-				}
-			}
-			
 			XMPPAvatarManager.getManager().start();
-			for( XMPPContact contact : this.roster.getContacts()){
-				XMPPAvatarManager.getManager().loadAvatar(contact, xmppConnection);
+			for (XMPPContact contact : this.roster.getContacts()) {
+				XMPPAvatarManager.getManager().loadAvatar(contact,
+						xmppConnection);
 			}
-			
+
 			accountVCard = new VCard();
-			accountVCard.load(xmppConnection);						
+			accountVCard.load(xmppConnection);
 		} catch (XMPPException e) {
 			Log.error(TAG, "Error on login", e);
 			throw new LoginException("Error on login!", e);
@@ -150,6 +137,7 @@ public class XMPPGenericConnection implements Connection,
 			org.jivesoftware.smack.packet.Message xmppMessage = new org.jivesoftware.smack.packet.Message();
 			xmppMessage.setTo(message.getTo());
 			xmppMessage.setBody(message.getBody());
+			xmppMessage.setFrom(this.xmppConnection.getUser());
 
 			for (String key : message.getHeadersKeys()) {
 				xmppMessage.setProperty(key, message.getHeader(key));
@@ -207,48 +195,25 @@ public class XMPPGenericConnection implements Connection,
 			if (packet instanceof org.jivesoftware.smack.packet.Message) {
 				Log.debug(TAG, "Message received :" + packet.toXML());
 
-				for (ConnectionListener listener : listeners) {
-					listener.messageReceived(
-							XMPPGenericConnection.this,
-							new XMPPMessage(
-									(org.jivesoftware.smack.packet.Message) packet));
+				switch (((org.jivesoftware.smack.packet.Message) packet)
+						.getType()) {
+				case chat:
+					fireNewMessageEvent((org.jivesoftware.smack.packet.Message) packet);
+					break;
+				default:
+					Log.debug(TAG, "Message not processed!");
+					break;
 				}
 			}
 		}
 	}
 
-	private class DiscoveryListener implements PacketListener {
+	private void fireNewMessageEvent(
+			org.jivesoftware.smack.packet.Message message) {
+		XMPPMessage newMessage = new XMPPMessage(message);
 
-		public void processPacket(Packet packet) {
-			if (packet instanceof org.jivesoftware.smackx.packet.DiscoverInfo) {
-				Log.debug(TAG, "Discovery info received :" + packet.toXML());
-				handleDiscoveryInfoPachet((DiscoverInfo) packet);
-			}
-		}
-	}
-
-	private void handleDiscoveryInfoPachet(DiscoverInfo discInfo) {
-		boolean match = false;
-		for (String future : Application.getContext().getApplicationFutures()) {
-			match = discInfo.containsFeature(future);
-
-			if (!match) {
-				break;
-			}
-		}
-
-		for (XMPPContact xmppContact : roster.getContacts()) {
-			if (xmppContact.getId().startsWith(
-					Util.getContactFromId(discInfo.getFrom()))) {
-
-				if (!xmppContact.isCompatible()) {
-					xmppContact.setCompatible(match);
-
-					for (RosterListener listener : roster.getListeners()) {
-						listener.contactUpdated(xmppContact);
-					}
-				}
-			}
+		for (ConnectionListener listener : listeners) {
+			listener.messageReceived(XMPPGenericConnection.this, newMessage);
 		}
 	}
 
@@ -263,32 +228,25 @@ public class XMPPGenericConnection implements Connection,
 			XMPPPresence xmppPresence = new XMPPPresence(presence);
 
 			for (XMPPContact xmppContact : roster.getContacts()) {
-				
+
 				if (xmppContact.getId().startsWith(contact)) {
 
-					if (xmppContact.getId().equals(presence.getFrom())) {						
+					if (xmppContact.getId().equals(presence.getFrom())) {
 						xmppContact.setPresense(xmppPresence);
-						
-						if( presence.getType() == Presence.Type.unavailable){
+
+						if (presence.getType() == Presence.Type.unavailable) {
 							xmppContact.setCompatible(false);
 							xmppContact.setResource("");
 						}
-					} else {												
-						
-						if (!xmppContact.isCompatible()) {							
+					} else {
+
+						if (!xmppContact.isCompatible()) {
 							xmppContact.setPresense(xmppPresence);
 							xmppContact.setResource(resource != null ? resource
 									: "");
-//							try {
-//								DiscoverInfo discInfo = sdm.discoverInfo(packet
-//										.getFrom());
-//								handleDiscoveryInfoPachet(discInfo);
-//							} catch (XMPPException e) {
-//								e.printStackTrace();
-//							}
-							
-							xmppContact.setCompatible(Util.isCompatible(xmppContact));														
-						}						
+							xmppContact.setCompatible(Util
+									.isCompatible(xmppContact));
+						}
 					}
 
 					break;
@@ -346,7 +304,11 @@ public class XMPPGenericConnection implements Connection,
 		return p;
 	}
 
-	public byte[] getAvatar() {		
+	public byte[] getAvatar() {
 		return this.accountVCard.getAvatar();
+	}
+
+	public RoomsManager getRoomsManager() {
+		return this.roomsManager;
 	}
 }

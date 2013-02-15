@@ -41,4 +41,6 @@ public interface Context {
 	public PLATFORM getPlatform();	
 	
 	public List<String> getApplicationFutures();
+	
+	public String getGameBaseURL();
 }

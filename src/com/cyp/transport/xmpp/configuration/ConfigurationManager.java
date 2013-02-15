@@ -13,9 +13,13 @@ import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.proxy.ProxyInfo;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
+import org.jivesoftware.smackx.packet.MUCAdmin;
 import org.jivesoftware.smackx.provider.DelayInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
 import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
+import org.jivesoftware.smackx.provider.MUCAdminProvider;
+import org.jivesoftware.smackx.provider.MUCOwnerProvider;
+import org.jivesoftware.smackx.provider.MUCUserProvider;
 import org.jivesoftware.smackx.provider.VCardProvider;
 import org.jivesoftware.smackx.pubsub.provider.EventProvider;
 import org.jivesoftware.smackx.pubsub.provider.ItemProvider;
@@ -51,7 +55,7 @@ public class ConfigurationManager {
 			configuration.setTruststoreType("BKS");
 			configuration.setTruststorePath(getCacertsPath());
 			configurePM(ProviderManager.getInstance());
-		}
+		}		
 		
 		return configuration;
 	}
@@ -93,7 +97,7 @@ public class ConfigurationManager {
 			configuration.setTruststoreType("BKS");
 			configuration.setTruststorePath(getCacertsPath());
 			configurePM(ProviderManager.getInstance());
-		}
+		}		
 		
 		return configuration;
 	}
@@ -112,7 +116,7 @@ public class ConfigurationManager {
 			config.setTruststoreType("BKS");
 			config.setTruststorePath(getCacertsPath());
 			configurePM(ProviderManager.getInstance());
-		}
+		}		
 		
 		return config;
 	}
@@ -157,9 +161,14 @@ public class ConfigurationManager {
 		pm.addExtensionProvider("event",
 				"http://jabber.org/protocol/pubsub#event", new EventProvider());
 		pm.addIQProvider(XMPPPingExtension.ELEMENT, XMPPPingExtension.NAMESPACE,
-				XMPPPingExtension.class);
+				XMPPPingExtension.class);		
+		pm.addExtensionProvider("x",
+				"http://jabber.org/protocol/muc#user", new MUCUserProvider());		
+		pm.addIQProvider("query",
+				"http://jabber.org/protocol/muc#admin", new MUCAdminProvider());								
+		pm.addIQProvider("query",
+				"http://jabber.org/protocol/muc#owner", new MUCOwnerProvider());			
 	}
-
 	
 	private static String getCacertsPath() {
 		try {
