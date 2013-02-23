@@ -9,6 +9,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import com.cyp.application.Application;
@@ -90,7 +91,7 @@ public class XMPPRoom implements Room {
 		if (!this.muc.isJoined()) {
 
 			try {						
-				this.muc.join(nickname);
+				this.muc.join(nickname,"cyppassword",new DiscussionHistory(),5000);
 //				Collection<Occupant> occupants = this.muc.getParticipants();
 //				List<XMPPOccupant> contacts = new ArrayList<XMPPOccupant>();
 //

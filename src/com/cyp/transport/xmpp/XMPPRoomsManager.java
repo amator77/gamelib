@@ -44,7 +44,7 @@ public class XMPPRoomsManager implements RoomsManager {
 //			.error("XMPPRoomsManager", "Error on rading rooms!",e);
 //		}
 		
-		XMPPRoom room = new XMPPRoom(new MultiUserChat(xmppConnection, "chessyoupmainroom@conference.jabber.org"));
+		XMPPRoom room = new XMPPRoom(new MultiUserChat(xmppConnection, "cypmainroom@conference.jabber.org"));
 		this.rooms.add(room);
 	}
 
