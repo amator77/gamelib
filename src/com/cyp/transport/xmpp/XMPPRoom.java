@@ -26,7 +26,7 @@ public class XMPPRoom implements Room {
 		this.muc = muc;
 		this.listeners = new ArrayList<RoomListener>();
 		this.muc.addParticipantListener(new ParticipantsListener());
-		this.muc.addMessageListener(new MessagesListener());
+		this.muc.addMessageListener(new MessagesListener());		
 	}
 
 	public String getName() {
@@ -48,27 +48,26 @@ public class XMPPRoom implements Room {
 	private class ParticipantsListener implements PacketListener {
 
 		public void processPacket(Packet packet) {
-			Application.getContext().getLogger().debug("XMPPRoom", packet.toXML());
-			
-			if( packet instanceof Presence){
-				Presence presence = (Presence)packet;
+			Application.getContext().getLogger()
+					.debug("XMPPRoom", packet.toXML());
+
+			if (packet instanceof Presence) {
+				Presence presence = (Presence) packet;
 				String username = getUserFomrJid(packet.getFrom());
-								
-				if( presence.getType() == Type.available){
-					System.out.println("user joined :"+username);
+
+				if (presence.getType() == Type.available) {
+					System.out.println("user joined :" + username);
+				} else if (presence.getType() == Type.unavailable) {
+					System.out.println("user leaved :" + username);
 				}
-				else if( presence.getType() == Type.unavailable ){
-					System.out.println("user leaved :"+username);
-				}				
-			}			
+			}
 		}
 
 		private String getUserFomrJid(String from) {
-			if( from.contains("/")){
+			if (from.contains("/")) {
 				String parts[] = from.split("//");
 				return parts[1];
-			}
-			else
+			} else
 				return from;
 		}
 	}
@@ -90,18 +89,26 @@ public class XMPPRoom implements Room {
 
 		if (!this.muc.isJoined()) {
 
-			try {						
-				this.muc.join(nickname,"cyppassword",new DiscussionHistory(),5000);
-//				Collection<Occupant> occupants = this.muc.getParticipants();
-//				List<XMPPOccupant> contacts = new ArrayList<XMPPOccupant>();
-//
-//				for (Occupant occupant : occupants) {
-//					contacts.add(new XMPPOccupant(occupant));
-//				}
-//
-//				for (RoomListener listener : listeners) {
-//					listener.contactList(contacts);
-//				}
+			try {
+				if (!this.muc.isJoined()) {
+					this.muc.join(nickname, "cyppassword",
+							new DiscussionHistory(), 5000);
+					// Collection<Occupant> occupants =
+					// this.muc.getParticipants();
+					// List<XMPPOccupant> contacts = new
+					// ArrayList<XMPPOccupant>();
+					//
+					// for (Occupant occupant : occupants) {
+					// contacts.add(new XMPPOccupant(occupant));
+					// }
+					//
+					// for (RoomListener listener : listeners) {
+					// listener.contactList(contacts);
+					// }
+				}
+				else{
+					Application.getContext().getLogger().debug("XMPPRoom", "Allready joined!");
+				}
 
 			} catch (XMPPException e) {
 				Application.getContext().getLogger()
@@ -110,10 +117,9 @@ public class XMPPRoom implements Room {
 			}
 
 			return true;
-		}
-		else{
+		} else {
 			return false;
-		}		
+		}
 	}
 
 	public void leave() {
@@ -122,7 +128,8 @@ public class XMPPRoom implements Room {
 
 	@Override
 	public String toString() {
-		return "XMPPRoom [muc=" + muc.getNickname() + ", listeners=" + listeners + "]";
+		return "XMPPRoom [muc=" + muc.getNickname() + ", listeners="
+				+ listeners + "]";
 	}
 
 	public void sendChatMessage(String body) {
